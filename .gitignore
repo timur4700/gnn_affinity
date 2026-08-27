@@ -1,0 +1,15 @@
+
+
+
+
+# ignore all test files
+*test*
+
+# Ignore additional files
+pdbbind_extract
+cli_test
+5bry
+
+
+.vscode
+__pycache__

@@ -1,0 +1,21 @@
+mol_preparation:
+
+  protein:
+    type: pocket # Options: [protein, pocket]
+    cutoff: 10
+    method: atom # Options: [atom, cog, com]
+
+  ligand:
+    ligand_format: mol2 # Options: [mol2, sdf]
+
+
+graph_preparation:
+
+  single_graph:
+    undirected: true # Options: [true, false]
+    self_loop: false # Options: [true, false]
+
+  comb_graph:
+    add_interaction_edges: true # Options: [true, false]
+    edge_type: true # Options: [true, false] / Adds 
+    cutoff: 5

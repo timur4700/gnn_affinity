@@ -1,0 +1,17 @@
+TrainingSettings:
+  optimizer: adam # Options: [adam, adam_w]
+  seed: 42
+  n_epochs: 100
+  learning_rate: 0.001
+  weight_decay: 0.0
+  early_stop: false # Options: [true, false]
+  when_early_stop: 100
+  loss_func: mse # Options: [mse]
+  verbose: 1 # Options: [0, 1]
+  device: cpu # Options: [cpu, cuda]
+
+
+LoaderSettings:
+  batch_size: 32
+  train_frac: 0.9
+  val_frac: 0.05

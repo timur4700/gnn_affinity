@@ -1,0 +1,1 @@
+from models.built_in_models.egnn_interaction import model, settings 
