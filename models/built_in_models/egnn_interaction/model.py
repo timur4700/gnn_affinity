@@ -29,7 +29,7 @@ class EgnnInteraction(Module):
 
 
         self.atom_embedd = utils.AtomEmbeddingLayer(101, hidden_dim)
-        self.rbf = utils_general.RBF(n_rbf, 'cpu', cutoff=cutoff)
+        self.rbf = utils_general.RBF(n_rbf, cutoff=cutoff)
         self.cutoff = cutoff
         self.bond_embedd = Embedding(3, hidden_dim)
 

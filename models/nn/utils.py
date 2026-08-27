@@ -103,12 +103,13 @@ class DropoutEdge(Module):
 
 class RBF(Module):
 
-    def __init__(self, n_rbf, device, cutoff=10):
+    def __init__(self, n_rbf,cutoff=10):
         super().__init__()
 
         self.n_rbf = n_rbf
-        self.centers = torch.linspace(0, cutoff, n_rbf, device=device, dtype=torch.float32)
+        centers = torch.linspace(0, cutoff, n_rbf, dtype=torch.float32)
         self.gamma = cutoff
+        self.register_buffer('centers', centers)
 
     def forward(self, norm):
 

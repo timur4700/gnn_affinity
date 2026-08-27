@@ -8,7 +8,7 @@ TrainingSettings:
   when_early_stop: 100
   loss_func: mse # Options: [mse]
   verbose: 1 # Options: [0, 1]
-  device: cpu # Options: [cpu, cuda]
+  device: cpu # Options: [cpu, cuda, mps] / mps for Apple GPU on M series
   save_train_log: true #Options [true, false]
 
 

@@ -182,7 +182,7 @@ class EGNNConv(Module):
             self.velocity = velocity
             self.weight = weight
 
-            self.rbf = utils.RBF(n_rbf, 'cpu', cutoff=cutoff)
+            self.rbf = utils.RBF(n_rbf, cutoff=cutoff)
             self.dist_embedd = utils.mlp(n_rbf, hidden_dim, hidden_dim)
 
 

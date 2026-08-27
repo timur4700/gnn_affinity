@@ -128,6 +128,26 @@ def get_run_id(parameters_directory: Path):
     return len(os.listdir(parameters_directory))
 
 
+def check_device(device) -> bool:
+
+    if device == 'cuda':
+        if torch.cuda.is_available():
+            return device
+        else:
+            print('WARRNING: CUDA is not available on this machine')
+            print('Falling back on CPU')
+            device = 'cpu'
+
+    elif device == 'mps':
+        if torch.backends.mps.is_available():
+            return device
+        else:
+            print('WARNING: MPS is not available on this machine')
+            print('Falling back on CPU')
+            device = 'cpu'
+
+    return device
+
 
 def save_model_run(model_metadata: dict,
                    model_params: OrderedDict,

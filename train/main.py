@@ -1,3 +1,4 @@
+import torch
 from torch.nn import Module
 from train import spliters
 from train import trainer
@@ -8,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from models.build import model_register
-from train.utils import save_model_run
+from train.utils import save_model_run, check_device
 
 
 def start_trainer(model_metadata: dict[str, Any],
@@ -17,6 +18,8 @@ def start_trainer(model_metadata: dict[str, Any],
 
     trainer_config = config['TrainingSettings']
     loader_config = config['LoaderSettings']
+
+    trainer_config['device'] = check_device(trainer_config['device'])
 
     dataset_metadata = model_metadata['dataset_metadata']
     dataset_path = Path(dataset_metadata['dataset_path'])
