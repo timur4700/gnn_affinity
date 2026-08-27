@@ -55,8 +55,12 @@ def make_parser():
     model_build = model_commands.add_parser('build', 
                                             help='Build registered DL model in the program')
     
-    model_build.add_argument('-m', '--model', required=True)
-    model_build.add_argument('-i', '--input', required=True)
+    model_build.add_argument('-m', '--model', required=True,
+                             help='Model name')
+    
+    model_build.add_argument('-i', '--input', required=True,
+                             help='Path to prepared dataset')
+    
     model_build.set_defaults(func=commands.run_model_prep)
 
     model_train = model_commands.add_parser('train', 

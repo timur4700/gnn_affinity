@@ -9,6 +9,7 @@ TrainingSettings:
   loss_func: mse # Options: [mse]
   verbose: 1 # Options: [0, 1]
   device: cpu # Options: [cpu, cuda]
+  save_train_log: true #Options [true, false]
 
 
 LoaderSettings:

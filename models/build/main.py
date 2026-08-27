@@ -5,7 +5,6 @@ from models.build import metadata
 
 from dataclasses import asdict
 
-import torch
 from torch.nn import Module
 
 
@@ -37,25 +36,27 @@ def build_model(dataset_directory: Path,
     metadata_path = model_directory['main'] / f'metadata_{dataset_id}.json'
 
     model_data = model_factory()
-    model_params = asdict(model_data.default_params) if default_params else model_data.custom_params['ModelSettings']
-    model: Module = model_data.model_class(**model_params)
-
-    init_model_params_path = model_directory['main'] / 'init_model.pth'
-
+    model_params = model_data.custom_params['ModelSettings']
 
     model_metadata = metadata.MetaData(model_name=model_name,
                                        id=dataset_id,
                                        model_params=model_params,
                                        dataset_metadata=dataset_metadata,
-                                       model_init_params_path=str(init_model_params_path),
                                        model_saved_params=str(model_directory['params']))
 
+
+
+    model_metadata.model_config_path = str(utils.model_config(model_directory['main'],
+                                                              model_name,
+                                                              dataset_id).resolve())
+
     model_metadata.trainer_config_path = str(utils.trainer_config(model_directory['main'],
-                                                              dataset_id))
+                                                              dataset_id).resolve())
 
 
-    torch.save(model.state_dict(), init_model_params_path)
     model_metadata.save(metadata_path)
 
-    print(f"Model main directory: {model_directory['main'].resolve()}")
+    print(f"\nModel main directory: {model_directory['main'].resolve()}")
+    print(f'Model Configuration Path: {model_metadata.model_config_path}')
+    print(f"Train Configuration Path: {model_metadata.trainer_config_path}")
     print(f"Dataset directory: {dataset_directory.resolve()}")

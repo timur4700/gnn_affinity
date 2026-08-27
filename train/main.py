@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from models.build import model_register
+from train.utils import save_model_run
 
 
 def start_trainer(model_metadata: dict[str, Any],
@@ -26,14 +27,14 @@ def start_trainer(model_metadata: dict[str, Any],
                                     spliters.SPLITERS['default'])
 
     model_name = model_metadata['model_name']
-    model_params = model_metadata['model_params']
+    model_config = general.load_yaml(model_metadata['model_config_path'])['ModelSettings']
 
     model = model_register.MODEL_REGISTER.get(model_name, None)
 
     if not model:
         print('Model not found\nClose...')
 
-    model: Module = model().model_class(**model_params).to(trainer_config['device'])
+    model: Module = model().model_class(**model_config).to(trainer_config['device'])
 
 
     model_trainer = trainer.Trainer(**trainer_config)
@@ -46,9 +47,18 @@ def start_trainer(model_metadata: dict[str, Any],
 
 
     model_trainer.start_train()
+    metrics = model_trainer.predict()
+
+    save_model_run(model_metadata,
+                   model_trainer.best_model_val_loss_param,
+                   model_config,
+                   config,
+                   metrics,
+                   model_trainer.train_log)
 
 
-    # Assessment on test dataset
-    model.load_state_dict(model_trainer.best_model_val_loss_param)
+
+
+
 
     

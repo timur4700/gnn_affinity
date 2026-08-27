@@ -64,6 +64,20 @@ def make_model_directory(parent_directory: Path,
 
 
 
+def model_config(model_directory: Path,
+                 model_name: str,
+                   id: str) -> Path:
+
+    model_config_source = Path(__file__).parent.parent / 'built_in_models' / 'all_settings' / f'{model_name}.yaml'
+    target_config_destination = model_directory / f'model_settings_{id}.yaml'
+
+    shutil.copy(model_config_source,
+                target_config_destination)
+
+    return target_config_destination
+
+
+
 def trainer_config(model_directory: Path,
                    id: str) -> Path:
 

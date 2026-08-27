@@ -24,7 +24,9 @@ class Predictor():
 
 
     @staticmethod
-    def predict(model: Module, test: DataLoader, model_params=None) -> Tuple[np.ndarray, np.ndarray]:
+    def predict(model: Module, 
+                test: DataLoader, 
+                model_params=None) -> Tuple[np.ndarray, np.ndarray]:
 
         device = next(model.parameters()).device
 
@@ -55,13 +57,17 @@ class Predictor():
     def calc_perf_stats(self, y_test, y_hat):
 
         stats_line = 'Test Prediction Stats: '
-        metrics = ''
+        metrics_line = ''
+        metrics_dict = dict()
 
         for k, v in self.metric_func.items():
 
             value = v(y_test, y_hat)
-            metrics += f"{k} = {value:.3f} | "
+            metrics_line += f"{k} = {value:.3f} | "
 
+            metrics_dict[k] = float(value)
 
-        stats_line += metrics + '\n'
+        stats_line += metrics_line + '\n'
         print(stats_line)
+
+        return metrics_dict

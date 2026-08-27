@@ -1,15 +1,16 @@
-from typing import Literal, Tuple
+from typing import Literal
 from pathlib import Path
-from collections import OrderedDict
 
 import torch
 from torch.nn import  Module
 from torch_geometric.loader import DataLoader
 
 from train import utils
+from train import predictor
 
 from utils.schemas import DataSetSplited
 from tqdm import tqdm
+
 
 
 
@@ -25,7 +26,7 @@ class Trainer():
                  loss_func: Literal['mse']='mse',
                  verbose: Literal[0, 1]=1,
                  device: str='cpu',
-                 save_train_log: bool=False
+                 save_train_log: bool=True
                  ):
 
         self.device = device
@@ -41,6 +42,8 @@ class Trainer():
         self.early_stop = early_stop
         self.when = when_early_stop
 
+        self.predictor = predictor.Predictor()
+
         self.loss_func = utils.make_loss_func(loss_func)()
 
         self.train_losses = []
@@ -51,7 +54,7 @@ class Trainer():
         self.save_log = save_train_log
 
         if save_train_log:
-            self.train_log = ''
+            self.train_log = 'Train Log:\n'
 
 
 
@@ -81,18 +84,12 @@ class Trainer():
         self.loaders = self.dataset.prepare_loaders(self.dataset.splited_dataset)
 
 
-    def start_train(self, 
-              ):
-
+    def start_train(self):
 
         assert isinstance(self.model, Module), 'The model is not uploaded to trainer'
 
-
         best_epoch = 0
         best_val_loss = 1e9
-
-        self.path = 'cli_test/model_201c47f/parameters'
-
 
         for i_epoch in range(self.n_epoch):
         
@@ -125,7 +122,6 @@ class Trainer():
                 best_val_loss = mean_val_loss 
                 best_epoch = i_epoch
                 self.best_model_val_loss_param = self.model.state_dict()
-                #self.save_checkpoint(i_epoch)
 
                   
         
@@ -137,7 +133,7 @@ class Trainer():
             self.train_losses.append(mean_train_loss)
             self.val_losses.append(mean_val_loss)
 
-            msg = f"Epoch {i_epoch+1:<4} | Train Loss {mean_train_loss:<6.5f} | Test Loss: {mean_val_loss:<6.5f} | Best Test Loss: {best_val_loss:<6.5f}"
+            msg = f"Epoch {i_epoch+1:<4} | Train Loss {mean_train_loss:<6.5f} | Test Loss: {mean_val_loss:<6.5f} | Best Val Loss: {best_val_loss:<6.5f}"
 
             if self.early_stop:
                 early_stop_msg = f'(Until early stop: {int(self.when - cur)})'
@@ -148,8 +144,6 @@ class Trainer():
 
             if self.save_log:
                 self.train_log += msg + '\n'
-
-        print()
 
     def test(self):
 
@@ -166,17 +160,19 @@ class Trainer():
         return  val_losses
 
 
-    def predictor(self, test_data):
+    def predict(self):
 
-        with torch.no_grad():
-            for batch in self.loaders['val']:
+        y_test, y_hat = self.predictor.predict(self.model,
+                                         self.loaders['test'],
+                                         self.best_model_val_loss_param)
 
-                batch = batch.to(self.device)        
-                y_true = batch.y
-                y_hat = self.model(batch)
+        metrics = self.predictor.calc_perf_stats(y_test,
+                                                 y_hat)
+
+        return metrics
+
 
             
-
 
 
     def save_checkpoint(self, epoch: int):

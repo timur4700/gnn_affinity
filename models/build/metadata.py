@@ -12,6 +12,7 @@ class MetaData:
     model_init_params_path: str = ''
     model_saved_params: str = None
     dataset_metadata: dict = None
+    model_config_path: str = ''
     trainer_config_path: str = ''
 
     def save(self, path):
