@@ -7,7 +7,14 @@ import numpy as np
 from torch_geometric.data import Data
 from utils.schemas import DataSetSplited
 
-from typing import Literal
+from typing import Literal, Any
+import os
+from pathlib import Path
+import re
+
+
+from utils import general
+
 
 def make_optimizer(optim: Literal['adam', 'adam_w']):
 
@@ -67,6 +74,55 @@ def general_spliter(dataset: list[Data],
 def search_spliter():
 
     pass
+
+
+
+def find_metadata(model_directory: Path) -> dict[str, Any] | None:
+    pattern = r'metadata'
+
+    for file in os.listdir(model_directory):
+        if re.findall(pattern=pattern,
+                      string=file):
+
+            return general.load_json(model_directory/file)
+
+    return None
+
+
+def check_metadata(model_metadata: dict[str, Any]) -> dict | None:
+
+    if model_metadata is None:
+        print("Model's metadata not found")
+        return None
+
+    print(f'Metadata successfully found')
+
+    model_name = model_metadata["model_name"]
+
+    print(f"Training model: {model_name}")
+
+
+    dataset_path = model_metadata['dataset_metadata']['dataset_path']
+
+    if not os.path.exists(dataset_path):
+        print(f"The dataset stated in metadata was not found")
+        return None
+
+    print('Dataset was found')
+
+    train_config = model_metadata['trainer_config_path']
+
+    if not os.path.exists(train_config):
+        return None
+
+    train_config = general.load_yaml(train_config)
+
+
+    return train_config
+
+
+
+
 
 
 

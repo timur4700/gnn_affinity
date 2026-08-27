@@ -52,12 +52,19 @@ def make_parser():
     model_commands = model.add_subparsers(dest='command',
                                           required=True)
 
-    model_build = model_commands.add_parser('build')
+    model_build = model_commands.add_parser('build', 
+                                            help='Build registered DL model in the program')
+    
     model_build.add_argument('-m', '--model', required=True)
     model_build.add_argument('-i', '--input', required=True)
-
     model_build.set_defaults(func=commands.run_model_prep)
 
+    model_train = model_commands.add_parser('train', 
+                                            help='Starting training model')
+    
+    model_train.add_argument('-i', '--input', help='The path to directory with prepared model')
+
+    model_train.set_defaults(func=commands.run_model_train)
 
 
     return parser

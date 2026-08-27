@@ -1,5 +1,5 @@
 from datasets import register as dataset_register
-from models import prepare_model
+
 
 
 def run_dataset_preparation(args):
@@ -16,6 +16,13 @@ def run_graph_preparation(args):
 
 
 def run_model_prep(args):
+    from models import prepare_model
 
     prepare_model(args.input,
                   args.model)
+
+
+def run_model_train(args):
+    from train import train_model
+
+    train_model(args.input)
