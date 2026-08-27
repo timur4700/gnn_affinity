@@ -71,4 +71,8 @@ def make_parser():
     model_train.set_defaults(func=commands.run_model_train)
 
 
+    model_list = model_commands.add_parser('list', help='Show available models')
+    model_list.set_defaults(func=commands.get_model_list)
+
+
     return parser

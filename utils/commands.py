@@ -15,6 +15,16 @@ def run_graph_preparation(args):
                        args.model)
 
 
+def get_model_list(args):
+    from models.build.model_register import MODEL_REGISTER
+
+    print('\nAvailable Models:')
+    print('-----------------')
+
+    for k in MODEL_REGISTER.keys():
+        print(f"- {k}")
+
+
 def run_model_prep(args):
     from models import prepare_model
 
