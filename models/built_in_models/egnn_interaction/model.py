@@ -218,7 +218,6 @@ class EgnnInteraction(Module):
         h_ijd = torch.cat([hi, hj, dist_inter], dim=-1) #, dist[mask_edge_inter]]
         out = self.affinity_head(h_ijd)
         out = out * weight
-        #out = self.dropout(out)
 
         out = self.pool(out, batch_edge)
 
