@@ -57,7 +57,7 @@ def install_project():
     cmd = [sys.executable,
            '-m',
            'pip',
-           'intall',
+           'install',
            '-e',
            '.']
 
