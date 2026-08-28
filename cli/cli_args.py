@@ -1,5 +1,5 @@
 import argparse
-from utils import commands
+from cli import commands
 
 
 def make_parser():
