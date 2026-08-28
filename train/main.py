@@ -1,4 +1,3 @@
-import torch
 from torch.nn import Module
 from train import spliters
 from train import trainer

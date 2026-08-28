@@ -2,6 +2,7 @@ import os
 import tarfile
 from tqdm import tqdm
 from datasets.pdbbind import index_data_prep
+from datasets import metadata
 
 import shutil
 import re
@@ -48,10 +49,11 @@ def tar_extract(directory_path: Path) -> dict[str, Path]:
 
 
 def merge_folders(directory_path: Path,
-                  folders: dict[str, Path]):
+                  folders: dict[str, Path],
+                  metadata: metadata.DatasetMeta):
 
-    merge_name = 'pdbbind_2020_merged'
-    merge_path = directory_path / merge_name
+    entry_name = 'pdbbind_2020_entries'
+    entries_path = directory_path / entry_name
     file_paths = dict()
 
     for name, folder_path in folders.items():
@@ -64,26 +66,41 @@ def merge_folders(directory_path: Path,
 
 
             pdb_source_path = folder_path / pdb_entry
-            pdb_dest_path = merge_path / pdb_entry
+            pdb_dest_path = entries_path / pdb_entry
             shutil.copytree(pdb_source_path, pdb_dest_path, 
                             dirs_exist_ok=True)
             
             file_paths[pdb_entry] = pdb_dest_path
 
-        print(f'All PDB entries in {name} were transfered to {str(merge_path)}')
+
+        entries_path = str(entries_path.resolve())
+
+        print(f'All PDB entries in {name} were transfered to {entries_path}')
+        metadata.entries_path = entries_path
 
     return file_paths
 
 
 
 def main(directory_path: Path):
+
+    dataset_metadata = metadata.DatasetMeta(
+        name='pdbbind'
+    )
+
+
     folder_paths = tar_extract(directory_path)
     merged_file_paths = merge_folders(directory_path,
-                                      folder_paths)
+                                      folder_paths,
+                                      dataset_metadata)
 
 
     csv_data_path = directory_path / 'pdbbind_data.csv'
-
     index_dir_path = merged_file_paths['index']
     index_data_prep.main(index_dir_path).to_csv(csv_data_path)
-    print(f'File with target variable saved in  {str(csv_data_path)}') 
+
+    csv_data_path = str(csv_data_path.resolve())
+    dataset_metadata.target_path = csv_data_path
+    dataset_metadata.save(directory_path)
+
+    print(f'File with target variable saved in  {csv_data_path}') 

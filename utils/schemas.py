@@ -1,10 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from collections.abc import Callable
+
+from pathlib import Path
 
 import torch
 
 from rdkit import Chem
 import numpy as np
+
+from utils import general
 
 @dataclass
 class Data:
@@ -57,3 +61,13 @@ class DataSetSplited:
     train: list[Data] = None
     val: list[Data] = None
     test: list[Data] = None
+
+
+@dataclass
+class MetaData:
+    
+    def save(self, 
+             path: Path):
+        general.save_json(asdict(self),
+                          path)
+        

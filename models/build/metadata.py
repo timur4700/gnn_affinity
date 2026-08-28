@@ -1,11 +1,12 @@
 from dataclasses import dataclass, asdict
 from utils import general
+from utils.schemas import MetaData
 
 
 
 
 @dataclass
-class MetaData:
+class ModelMetaData(MetaData):
     model_name: str = ''
     id: str = None
     model_params: dict = None
@@ -14,7 +15,3 @@ class MetaData:
     dataset_metadata: dict = None
     model_config_path: str = ''
     trainer_config_path: str = ''
-
-    def save(self, path):
-        general.save_json(asdict(self),
-                          path)

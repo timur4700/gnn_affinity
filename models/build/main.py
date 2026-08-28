@@ -33,7 +33,7 @@ def build_model(dataset_directory: Path,
     model_data = model_factory()
     model_params = model_data.custom_params['ModelSettings']
 
-    model_metadata = metadata.MetaData(model_name=model_name,
+    model_metadata = metadata.ModelMetaData(model_name=model_name,
                                        id=dataset_id,
                                        model_params=model_params,
                                        dataset_metadata=dataset_metadata,
