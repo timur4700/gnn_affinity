@@ -3,14 +3,9 @@ from models.build import utils
 from models.build import model_register
 from models.build import metadata
 
-from dataclasses import asdict
-
-from torch.nn import Module
-
 
 def build_model(dataset_directory: Path,
-                model_name: str,
-                default_params: bool=True):
+                model_name: str):
 
     dataset_parent_directory = dataset_directory.parent
     dataset_metadata = utils.find_metadata(dataset_directory)
@@ -46,12 +41,14 @@ def build_model(dataset_directory: Path,
 
 
 
-    model_metadata.model_config_path = str(utils.model_config(model_directory['main'],
-                                                              model_name,
-                                                              dataset_id).resolve())
+    model_metadata.model_config_path = str(utils.model_config_save(
+                                                    model_directory['main'],
+                                                    model_name,
+                                                    dataset_id).resolve())
 
-    model_metadata.trainer_config_path = str(utils.trainer_config(model_directory['main'],
-                                                              dataset_id).resolve())
+    model_metadata.trainer_config_path = str(utils.trainer_config_save(
+                                                    model_directory['main'],
+                                                    dataset_id).resolve())
 
 
     model_metadata.save(metadata_path)

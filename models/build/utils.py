@@ -64,7 +64,7 @@ def make_model_directory(parent_directory: Path,
 
 
 
-def model_config(model_directory: Path,
+def model_config_save(model_directory: Path,
                  model_name: str,
                    id: str) -> Path:
 
@@ -78,7 +78,7 @@ def model_config(model_directory: Path,
 
 
 
-def trainer_config(model_directory: Path,
+def trainer_config_save(model_directory: Path,
                    id: str) -> Path:
 
     trainer_config_source = Path(__file__).parent.parent.parent / 'train' / 'settings.yaml'

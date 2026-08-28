@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77.0.3"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy==1.26.4",
     "h5py==3.16.0",
-    "rdkit==2026.03.3"
+    "rdkit>=2025.9.3"
 ]
 
 
