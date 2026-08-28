@@ -202,7 +202,7 @@ class EGNNConv(Module):
             if self.cosine_cutoff:
                 cosine_weight = utils.cosine_cutoff(dist, cutoff=self.cutoff)
 
-            dist = self.rbf(dist  * cosine_weight)
+            dist = self.rbf(dist) * cosine_weight
             dist = self.dist_embedd(dist)
 
             if self.edge_attr:
