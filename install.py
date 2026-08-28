@@ -32,20 +32,21 @@ def install_packages(device):
         device = 'cpu'
         add_args = '--no-build-isolation'
     
-    cmd_torch = [sys.executable,'pip',
-               'install',
-               '-r',
-               str(packages/install_file_torch.format(device))]
+    cmd_torch = [sys.executable, '-m', 'pip',
+                 'install',
+                 '-r',
+                 str(packages/install_file_torch.format(device))]
 
-    subprocess.run(cmd_torch)
+    subprocess.run(cmd_torch, check=True)
 
-    cmd_t_geom =  [i for i in[sys.executable,'pip',
-                   'install',
-                   '-r',
-                   str(packages/install_file_t_geom.format(device)),
-                   add_args] if i]
+    cmd_t_geom =  [i for i in[sys.executable, '-m',
+                              'pip',
+                              'install',
+                              '-r',
+                              str(packages/install_file_t_geom.format(device)),
+                              add_args] if i]
 
-    subprocess.run(cmd_t_geom)
+    subprocess.run(cmd_t_geom, check=True)
 
     print('All required PyTorch packages installed successfully')
 
@@ -54,12 +55,13 @@ def install_packages(device):
 
 def install_project():
     cmd = [sys.executable,
+           '-m'
            'pip',
            'intall',
            '-e',
            '.']
 
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=True)
     print('Project GNN Affinity installed successfully')
     print('To initialize it, activate the conda environment: gnn-aff')
     print('Run the program with: gnn-affinity')
@@ -88,9 +90,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-main('cuda')
