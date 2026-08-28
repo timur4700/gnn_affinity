@@ -44,6 +44,8 @@ def chunk_size_calc(iterable: Sequence[Any]) -> int:
 def init_worker(index_data: pd.DataFrame, 
                 config: dict[str, str|float], 
                 features: schemas.Features):
+
+    general.limit_native_threads()
     
     global _index_data, _config, _features
     _index_data = index_preprocess(index_data)

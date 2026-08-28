@@ -4,8 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pickle
-
-
+import os
 
 
 def load_yaml(path: str | Path) -> dict:
@@ -61,3 +60,10 @@ def unpack_pickle(path: Path):
 
 
     return data
+
+
+def limit_native_threads(n: str='1'):
+    for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
+                    "VECLIB_MAXIMUM_THREADS", "MKL_NUM_THREADS",
+                    "NUMEXPR_NUM_THREADS"):
+            os.environ.setdefault(var, n)
