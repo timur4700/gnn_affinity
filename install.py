@@ -24,7 +24,7 @@ def install_packages(device):
     install_file_t_geom = 'requirements_geom_{}.txt'
     add_args = None
     
-    if platform.system() == "Dawin":
+    if platform.system() == "Darwin":
     
         print('MacOS system detected')
         print('WARNING: PyTorch will be installed with cpu backend and --no-build-isolation')
