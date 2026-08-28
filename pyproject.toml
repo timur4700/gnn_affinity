@@ -19,7 +19,7 @@ dependencies = [
 
 
 [project.scripts]
-gnn_affinity = "main:main"
+gnn-affinity = "main:main"
 
 [tool.setuptools]
 py-modules = ["main"]
