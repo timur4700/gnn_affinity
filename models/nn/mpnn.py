@@ -233,7 +233,7 @@ class EGNNConv(Module):
             x_new = self.node_function(torch.cat([x, m_i], dim=-1))
             x = x + x_new
 
-            return x, coords_new
+            return x_new, coords_new
 
 
 class EGNNConvBlock(Module):
