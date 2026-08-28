@@ -55,7 +55,7 @@ def install_packages(device):
 
 def install_project():
     cmd = [sys.executable,
-           '-m'
+           '-m',
            'pip',
            'intall',
            '-e',
