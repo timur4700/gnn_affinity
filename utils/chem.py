@@ -12,7 +12,6 @@ from typing import Literal
 import numpy as np
 import torch
 
-from scipy.spatial.distance import cdist
 
 
 
@@ -231,7 +230,7 @@ def mol_subset(mol: Chem.Mol,
                 bond_ids.add(bond.GetIdx())
     bond_ids= list(bond_ids)
 
-    atom_map = {}  # will map original_idx -> new submol_idx
+    atom_map = {}
     submol = Chem.PathToSubmol(mol, bond_ids, atomMap=atom_map)
     return submol
 
@@ -317,10 +316,3 @@ def pocket_extraction(ligand: Chem.Mol,
     extracted_pocket = mol_subset(protein, atom_ids2extract)
 
     return extracted_pocket
-
-
-
-def nearest_cdist(ligand_positions, protein_positions, cutoff):
-    dists_sq = cdist(ligand_positions, protein_positions, metric='sqeuclidean')
-    mask = dists_sq <= cutoff ** 2
-    return np.where(mask.any(axis=0))[0]

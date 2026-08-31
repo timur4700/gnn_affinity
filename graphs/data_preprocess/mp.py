@@ -68,8 +68,6 @@ def mp_prepare(graph_manager: GraphManager,
                 print(e)
                 raise
                         
-
-            
             finally:
                 pool.close()
                 pool.join()

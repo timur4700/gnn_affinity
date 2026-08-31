@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from typing import Literal
 
 
@@ -12,7 +12,7 @@ class LigandConfig:
 
 @dataclass
 class ProteinConfig:
-    cutoff: float = 0
+    cutoff: float = 0.0
     method: Literal['atom', 'cog', 'com'] = ''
     sanitize: bool = False
 
