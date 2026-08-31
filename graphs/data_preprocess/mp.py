@@ -51,7 +51,7 @@ def mp_prepare(graph_manager: GraphManager,
         with Pool(n_proc, init_worker, (graph_manager,)) as pool:
                     
             try:
-                for result, error in tqdm(pool.imap(main_worker, 
+                for result, error in tqdm(pool.imap_unordered(main_worker, 
                                                 entries_paths,
                                                 chunksize=chunk_size), 
                                                 total=n_entries):
@@ -60,8 +60,8 @@ def mp_prepare(graph_manager: GraphManager,
                         failed_complexes.append(error)
                         continue
 
-                pickle.dump(result, f)
-                graphs_prepared += 1
+                    pickle.dump(result, f)
+                    graphs_prepared += 1
 
             except Exception as e:
 

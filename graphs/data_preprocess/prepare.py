@@ -144,7 +144,8 @@ def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
     graph_dataset_metadata = make_graph_dataset_meta(preprocess_data,
                                                      dataset_metadata)
 
-
+    print(f"N_CPU: {preprocess_data.mp_config.n_proc}")
+    print(f"CHUNK: {preprocess_data.mp_config.chunk_size}")
 
     results = mp.mp_prepare(
         graph_manager,

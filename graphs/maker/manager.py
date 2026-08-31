@@ -61,10 +61,6 @@ class GraphManager():
                                       sanitize=sanitize)
 
         if extract_near_res:
-
-            if ligand is None:
-                return protein
-
             return protein_func.pocket_extraction(ligand,
                                                 protein,
                                                 cutoff_distance=cutoff,

@@ -223,12 +223,6 @@ def mol_subset(mol: Chem.Mol,
                remain_atoms: np.ndarray):
     atom_ids = set(remain_atoms)
 
-    # find bonds where BOTH endpoints are in your atom set
-    #bond_ids = [
-    #    bond.GetIdx()
-    #    for bond in mol.GetBonds()
-    #    if bond.GetBeginAtomIdx() in atom_ids and bond.GetEndAtomIdx() in atom_ids
-    #]
 
     bond_ids = set()
     for idx in atom_ids:
