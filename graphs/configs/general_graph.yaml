@@ -1,0 +1,10 @@
+GraphConfig:
+  Graph:
+    undirected: true # Options: [true, false]
+    self_loop: false # Options: [true, false]
+    cutoff: 10.0 # Intramolecule (for 3D graphs)
+
+  Interaction:
+    add_interaction_edges: true # Options: [true, false]
+    edge_type: true # Options: [true, false] / Adds 
+    cutoff: 5.0 # Intermolecule (ie between ligand and protein)

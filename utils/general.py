@@ -67,3 +67,22 @@ def limit_native_threads(n: str='1'):
                     "VECLIB_MAXIMUM_THREADS", "MKL_NUM_THREADS",
                     "NUMEXPR_NUM_THREADS"):
             os.environ.setdefault(var, n)
+
+
+
+def mco(msg,
+        choices: list[str]):
+
+    print(msg)
+    print('\n'.join([f"{i}) {choice}" for i, choice
+                     in enumerate(choices)]))
+
+    while True:
+        try:
+            user_choice = int(input('INPUT: '))
+            if user_choice < 0:
+                raise IndexError
+            
+            return user_choice
+        except Exception:
+            print('Wrong input!')

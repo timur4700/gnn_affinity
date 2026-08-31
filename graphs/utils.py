@@ -8,6 +8,7 @@ from torch_geometric.data import Data
 from utils import schemas, chem
 
 from collections.abc import Callable
+from typing import Any
 
 
 
@@ -37,91 +38,13 @@ def add_ligand_protein_id(ligand_x: torch.Tensor,
     return torch.cat([ligand_id, protein_id], dim=0)
 
 
-def construct_feature_matrix(mol: Chem.Mol,
-                             ligand=False,
-                             ligand_features: dict[str, Callable]=None,
-                             protein_features: dict[str, Callable]=None) -> tuple[np.ndarray, np.ndarray]:
 
-    """
-    Constructs feature matrix per protein [N, F]
-
-    Current features and associated column ID
-
-    - 0: Atomic Number, int
-    - 1: Aromatic Type [0, 1], int
-    - 2: Number of Total Attached Hydrogens (explicit + implicit), int
-    - 3: Residue Type (for protein), int
-
-    Parameters
-    ----------
-    mol : rdkit.Chem.Mol
-        RDKit molecule object
-
-
-    Returns
-    -------
-    np.ndarray
-        Constructed feature matrix
-    """
-
-    n_atoms = mol.GetNumAtoms()
-
-
-    if ligand:
-        feature_dict = chem.AtomFeatureExtract().extract_func()
-        matrix = np.zeros((n_atoms, len(feature_dict) + 1))
-
-    else:
-        feature_dict = chem.ProteinFeatureExtract().extract_func()
-        matrix = np.zeros((n_atoms, len(feature_dict)))
-
-
-    # Extract Atomic Positions (3D)
-    positions = mol.GetConformer().GetPositions()
-
-    for i, atom in enumerate(mol.GetAtoms()):
-         for n,f in enumerate(feature_dict.values()):
-              matrix[i, n] = f(atom)
-
-    return (matrix, positions)
-
-
-
-def construct_edge_matrix(mol: Chem.Mol,
-                          **kwargs) -> schemas.LigandData | schemas.ProteinData:
-
-    a_matrix = chem.adjacency_matrix(mol, **kwargs)
-    edge_index = chem.to_sparse_adjacency_matrix(a_matrix)
-
-
-    return edge_index
-
-
-
-def construct_interaction_edges(ligand_positions: np.ndarray | torch.Tensor,
-                                protein_positions: np.ndarray | torch.Tensor,
-                                cutoff: int | float=5.0) -> np.ndarray | torch.Tensor:
-
-
-    d_ij = chem.get_distance(ligand_positions,
-                             protein_positions)
-
-    cutoff_mask = d_ij <= cutoff
-
-    if (isinstance(ligand_positions, torch.Tensor) and
-        isinstance(protein_positions, torch.Tensor)):
-
-        return torch.nonzero(cutoff_mask).T
-
-    return np.array(np.nonzero(cutoff_mask))
-
-
-
-def construct_feature_matrix_new(
+def construct_feature_matrix(
         mol: Chem.Mol,
         ligand=False,
         ligand_features: dict[str, Callable]=None,
-        protein_features: dict[str, Callable]= None) -> tuple[np.ndarray, np.ndarray]:
+        protein_features: dict[str, Callable]= None,
+        protein: bool = False) -> tuple[np.ndarray, np.ndarray]:
     
 
     """
@@ -287,7 +210,7 @@ def prepare_mol_data(data: schemas.LigandData | schemas.ProteinData,
 
 
     # Preparing Atom (Node) features and Positions
-    data.atom_features, data.positions = construct_feature_matrix_new(
+    data.atom_features, data.positions = construct_feature_matrix(
                                             data.mol,
                                             ligand,
                                             features.ligand_features,
@@ -305,10 +228,11 @@ def prepare_mol_data(data: schemas.LigandData | schemas.ProteinData,
 
 
 
-def prepare_graph(data: schemas.LigandData | schemas.ProteinData,
+def make_graph(data: schemas.LigandData | schemas.ProteinData,
                   undirected=True,
                   self_loop=False,
-                  features: schemas.Features = None) -> Data:
+                  features: schemas.Features = None,
+                  cutoff: float=None) -> Data:
 
     graph = Data()
 
@@ -382,3 +306,26 @@ def combine_graphs(ligand_graph: Data,
 
 
     return graph
+
+
+
+def insert_data2graph(graph: Data,
+                      data: dict[str, Any],
+                      y_dtype: torch.dtype=torch.float32):
+
+    """
+    The function that unserts data to torch_geometric.data.Data object
+    **Note!** The function expect, that data includes ``y`` key, ie target variable
+    
+    """
+
+    if 'y' not in data:
+        print('The target variable was not provided for the graph')
+
+    for k, v in data.items():
+
+        if k == 'y':
+            setattr(graph, k, torch.tensor(v, dtype=y_dtype))
+            continue
+
+        setattr(graph, k, v)

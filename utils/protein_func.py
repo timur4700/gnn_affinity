@@ -4,16 +4,12 @@ from utils import general, chem
 
 import numpy as np
 
+
 def get_residue_ids(protein: Chem.Mol) -> np.ndarray:
 
-    resids = np.zeros(protein.GetNumAtoms())
+    return np.array([atom.GetPDBResidueInfo().GetResidueNumber() for atom 
+                     in protein.GetAtoms()], dtype=int)
 
-    for i, atom in enumerate(protein.GetAtoms()):
-        residue_id = atom.GetPDBResidueInfo().GetResidueNumber()
-        resids[i] = residue_id
-
-
-    return resids
 
 
 

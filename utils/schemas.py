@@ -10,6 +10,32 @@ import numpy as np
 
 from utils import general
 
+
+
+
+def _object_encoder(obj):
+
+    """
+    Converts Path objects into str
+    
+    """
+
+    if isinstance(obj, Path):
+        return str(obj)
+
+    if isinstance(obj, dict):
+        return {k: _object_encoder(v) for k, v in obj.items()}
+
+    return obj
+
+
+
+@dataclass
+class MolPaths:
+    ligand_path: Path = None
+    protein_path: Path = None
+
+
 @dataclass
 class Data:
     mol: Chem.Mol | None=None
@@ -65,9 +91,8 @@ class DataSetSplited:
 
 @dataclass
 class MetaData:
-    
-    def save(self, 
-             path: Path):
-        general.save_json(asdict(self),
+    def save(self, path: Path):
+        
+        general.save_json(_object_encoder(asdict(self)),
                           path)
         

@@ -1,0 +1,45 @@
+from utils import schemas
+from pathlib import Path
+from typing import Literal
+from abc import ABC, abstractmethod
+
+
+
+class PathBuilder(ABC):
+
+    """
+    The base method for building paths to the ligand and protein, based on 
+    directory of PL-complex
+    """
+
+    def __init__(self):
+
+        self.protein_format = None
+        self.ligand_format = None
+
+
+    @abstractmethod
+    def build(self, complex_dir) -> schemas.MolPaths:
+        pass
+
+
+
+
+
+class PDBbindPaths(PathBuilder):
+    def __init__(self,
+                 pocket: bool=False,
+                 ligand_file_format: 
+                 Literal['mol2, sdf'] = 'mol2'):
+
+        
+        self.protein_format = '{}' + f"_{'pocket' if pocket else 'protein'}.pdb"
+        self.ligand_format = '{}' + f'_ligand.{ligand_file_format}'
+
+
+    def build(self, complex_dir: Path):
+        pdb_name = complex_dir.name
+
+
+        return schemas.MolPaths(ligand_path=complex_dir/self.ligand_format.format(pdb_name),
+                                protein_path=complex_dir/self.protein_format.format(pdb_name))

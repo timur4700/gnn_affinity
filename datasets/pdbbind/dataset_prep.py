@@ -7,6 +7,8 @@ from datasets import metadata
 import shutil
 import re
 
+from utils import general
+
 from pathlib import Path
 
 # Only PDBbind v.2020 + CASF2016
@@ -20,6 +22,12 @@ folder_names = {
     general_set: 'general-set',
     refined_set: 'refined_set'
 }
+
+
+
+# Molecule Preparation Configuration File
+mol_config_path = Path(__file__).resolve().parent / 'config.yaml'
+
 
 
 
@@ -50,7 +58,7 @@ def tar_extract(directory_path: Path) -> dict[str, Path]:
 
 def merge_folders(directory_path: Path,
                   folders: dict[str, Path],
-                  metadata: metadata.DatasetMeta):
+                  metadata: metadata.DatasetMetadata):
 
     entry_name = 'pdbbind_2020_entries'
     entries_path = directory_path / entry_name
@@ -73,10 +81,12 @@ def merge_folders(directory_path: Path,
             file_paths[pdb_entry] = pdb_dest_path
 
 
-        entries_path = str(entries_path.resolve())
+        entries_path_str = str(entries_path.resolve())
 
-        print(f'All PDB entries in {name} were transfered to {entries_path}')
-        metadata.entries_path = entries_path
+        print(f'All PDB entries in {name} were transfered to {entries_path_str}')
+
+
+    metadata.entries_path = entries_path_str
 
     return file_paths
 
@@ -101,6 +111,8 @@ def main(directory_path: Path):
 
     csv_data_path = str(csv_data_path.resolve())
     dataset_metadata.target_path = csv_data_path
-    dataset_metadata.save(directory_path)
+    dataset_metadata.save(directory_path / 'metadata.json')
+
+    mol_config = general.load_yaml(mol_config_path)
 
     print(f'File with target variable saved in  {csv_data_path}') 
