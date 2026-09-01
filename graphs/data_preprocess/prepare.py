@@ -53,8 +53,9 @@ def make_entries_path_data(dataset_metadata: metadata.DatasetMetadata):
 
 
 def calc_chunck_n_proc(entries_paths):
-    n_proc = os.cpu_count()
-    chunk_size = helpers.chunk_size_calc(entries_paths)
+    n_proc = 10#os.cpu_count()
+    chunk_size = helpers.chunk_size_calc(entries_paths,
+                                         n_proc)
 
     return {'n_proc': n_proc, 'chunk_size': chunk_size}
 

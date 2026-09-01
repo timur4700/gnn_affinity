@@ -31,8 +31,8 @@ def index_preprocess(index_data: pd.DataFrame) -> dict[str, list[Any]]:
 
 
 
-def chunk_size_calc(iterable: Sequence[Any]) -> int:
-    n_proc = os.cpu_count()
+def chunk_size_calc(iterable: Sequence[Any],
+                    n_proc: int) -> int:
     chunk, extra = divmod(len(iterable), n_proc * 4)
 
     if extra:

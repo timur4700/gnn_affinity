@@ -12,7 +12,6 @@ def get_residue_ids(protein: Chem.Mol) -> np.ndarray:
 
 
 
-
 def pocket_extraction(ligand: Chem.Mol,
                       protein: Chem.Mol,
                       cutoff_distance: float=10,
@@ -48,11 +47,14 @@ def pocket_extraction(ligand: Chem.Mol,
     protein_atoms_in_cutoff = np.any(cutoff_mask, axis=0)
     protein_residues_in_cutoff = np.unique(resids[protein_atoms_in_cutoff])
 
+
     atom_ids2extract = np.nonzero(np.isin(resids, 
                                           protein_residues_in_cutoff))[0]
 
 
     extracted_pocket = chem.mol_subset(protein, atom_ids2extract)
 
+    if sanitize:
+        Chem.SanitizeMol(extracted_pocket)
 
     return extracted_pocket

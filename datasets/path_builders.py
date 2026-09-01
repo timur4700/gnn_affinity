@@ -28,7 +28,7 @@ class PathBuilder(ABC):
 
 class PDBbindPaths(PathBuilder):
     def __init__(self,
-                 pocket: bool=False,
+                 pocket: bool=True,
                  ligand_file_format: 
                  Literal['mol2, sdf'] = 'mol2'):
 

@@ -235,6 +235,8 @@ def mol_subset(mol: Chem.Mol,
     return submol
 
 
+
+
 def mol_subset_old(mol: Chem.Mol,
                remain_atoms: np.ndarray) -> Chem.Mol:
 
@@ -307,7 +309,7 @@ def pocket_extraction(ligand: Chem.Mol,
 
     cutoff_mask = d_ij <= cutoff_distance
     protein_atoms_in_cutoff = np.any(cutoff_mask, axis=0)
-    protein_residues_in_cutoff = np.unique(resids[protein_atoms_in_cutoff])
+    protein_residues_in_cutoff = np.unique(resids[~protein_atoms_in_cutoff])
 
     atom_ids2extract = np.nonzero(np.isin(resids, 
                                           protein_residues_in_cutoff))[0]

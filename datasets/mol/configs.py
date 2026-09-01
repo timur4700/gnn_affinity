@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Literal
 
 
-
-
 @dataclass
 class LigandConfig:
     ligand_format: Literal['sdf, mol2'] = ''
@@ -32,7 +30,6 @@ class MolConfig:
             ligand=LigandConfig(**data['Ligand']),
             protein=ProteinConfig(**data['Protein'])
         )
-
 
 
 @dataclass

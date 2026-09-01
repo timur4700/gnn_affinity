@@ -29,8 +29,6 @@ class GraphManager():
         # Defining Path 2 Files
         self.path_builder = path_builder
 
-
-
         # Graph Builder
         self.graph_builder = graph_builder
 
@@ -38,7 +36,6 @@ class GraphManager():
 
         self.index_data = target_data
         self.sanitize = sanitize
-
 
 
     def set_data(self, complex_dir: str | Path):
