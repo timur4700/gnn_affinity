@@ -75,8 +75,7 @@ def merge_folders(directory_path: Path,
 
             pdb_source_path = folder_path / pdb_entry
             pdb_dest_path = entries_path / pdb_entry
-            shutil.copytree(pdb_source_path, pdb_dest_path, 
-                            dirs_exist_ok=True)
+            shutil.move(pdb_source_path, pdb_dest_path)
             
             file_paths[pdb_entry] = pdb_dest_path
 
@@ -94,7 +93,7 @@ def merge_folders(directory_path: Path,
 
 def main(directory_path: Path):
 
-    dataset_metadata = metadata.DatasetMeta(
+    dataset_metadata = metadata.DatasetMetadata(
         name='pdbbind'
     )
 
