@@ -19,6 +19,7 @@ def init_worker(graph_manager: GraphManager):
 
 
 
+
 def main_worker(complex_dir):
         try:
             _graph_manager.set_data(complex_dir)
@@ -44,7 +45,9 @@ def mp_prepare(graph_manager: GraphManager,
 
     failed_complexes = list()
 
+
     n_entries = len(entries_paths)
+
 
     with open(save_path, 'wb') as f:
         graphs_prepared = 0

@@ -2,6 +2,13 @@ from datasets import register as dataset_register
 from pathlib import Path
 from utils import general
 
+import os
+
+def limit_threads():
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
 
 def run_dataset_preparation(args):
@@ -21,11 +28,14 @@ def run_graph_config(args):
 
 
 def run_graph_preparation(args):
+    limit_threads()
     from graphs.data_preprocess import prepare
     from datasets.metadata import DatasetMetadata
 
+
     dataset_meta_path = Path(args.input)
     dataset_metadata = DatasetMetadata(**general.load_json(dataset_meta_path))
+
 
     prepare.preprocess_graph_dataset(dataset_metadata,
                                      Path(args.output))

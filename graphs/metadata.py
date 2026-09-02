@@ -8,7 +8,6 @@ from graphs.utils import add_feature_padding
 from graphs.configs.structure import GraphConfig
 
 from utils.schemas import Features
-from utils.general import make_unique_id
 
 import pandas as pd
 
@@ -43,6 +42,8 @@ class GraphDatasetMeta(MetaData):
 
 @dataclass
 class SavingPaths:
+    tmp_dir: str = ''
+    tmp_dataset_np: str = ''
     graph_dataset_dir: str = ''
     graph_dataset: str = ''
     metadata: str = ''
@@ -53,6 +54,7 @@ class SavingPaths:
 
         save_paths = cls(graph_dataset_dir=destination_path / \
                          f'prepared_data_{dataset_id}')
+
 
         save_paths.graph_dataset = save_paths.graph_dataset_dir / \
                                     f'pdbbind_graph_dataset_{dataset_id}.pkl'

@@ -2,7 +2,6 @@ from models.build.model_register import MODEL_REGISTER
 from datasets.register import DATASET_REGISTER
 
 from typing import Any
-import importlib
 
 class DBCaller():
     def __init__(self):

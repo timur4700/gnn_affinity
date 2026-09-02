@@ -3,8 +3,6 @@ from collections.abc import Callable
 
 from pathlib import Path
 
-import torch
-
 from rdkit import Chem
 import numpy as np
 
@@ -44,17 +42,6 @@ class Data:
     edge_index: np.ndarray | None=None
     positions: np.ndarray | None=None
 
-
-    def convert2tensor(self):
-
-        self.atom_features = torch.tensor(self.atom_features, 
-                                          dtype=torch.float32)
-
-        self.edge_index = torch.tensor(self.edge_index,
-                                       dtype=torch.long)
-
-        self.positions = torch.tensor(self.positions, 
-                                      dtype=torch.float32)
 
 
 

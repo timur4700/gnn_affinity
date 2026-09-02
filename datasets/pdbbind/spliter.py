@@ -1,12 +1,11 @@
-from torch_geometric.data import Data
 import numpy as np
-
+from typing import Any
 from utils.schemas import DataSetSplited
 
 
 
 
-def pdbbind_spliter(dataset: list[Data],
+def pdbbind_spliter(dataset: list[Any],
                     seed: int=42,
                     train_frac: float=0.9):
 

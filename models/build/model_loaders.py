@@ -23,20 +23,18 @@ def bind_graphs2model(model_name):
 
     
 
-
-
 def egnn_interaction_loader():
     from models.built_in_models import egnn_interaction
-    from models.built_in_models.egnn_interaction import features
+    from models.built_in_models.egnn_interaction import features, settings
 
     model_name = 'egnn_interaction'
     custom_settings = settings_path / (model_name + '.yaml')
 
 
     return Model(model_name=model_name,
-                 model_class=egnn_interaction.model.EgnnInteraction,
+                 model_class=egnn_interaction.get_model_class,
                  graph_builder=bind_graphs2model(model_name),
                  features=features.egnn_interaction_features(),
-                 default_params=egnn_interaction.settings.ModelSettings(),
+                 default_params=settings.ModelSettings(),
                  custom_params=general.load_yaml(custom_settings))
 

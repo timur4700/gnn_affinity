@@ -1,5 +1,4 @@
 from dataclasses import dataclass, asdict
-from utils import general
 from utils.schemas import MetaData
 
 

@@ -50,16 +50,14 @@ def unpack_pickle(path: Path):
     data = []
 
     with open(path, 'rb') as f:
-
         while True:
             try:
                 data.append(pickle.load(f))
-    
+                    
             except EOFError:
                 break
-
-
     return data
+
 
 
 def limit_native_threads(n: str='1'):

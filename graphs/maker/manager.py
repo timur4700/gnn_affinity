@@ -8,7 +8,7 @@ from graphs.maker.builders import GraphBuilder
 from pathlib import Path
 
 from rdkit import Chem
-from utils import chem, protein_func
+from chem import protein_chem, utils
 
 from datasets.pdbbind.metadata import MolConfig
 
@@ -58,7 +58,7 @@ class GraphManager():
                                       sanitize=sanitize)
 
         if extract_near_res:
-            return protein_func.pocket_extraction(ligand,
+            return protein_chem.pocket_extraction(ligand,
                                                 protein,
                                                 cutoff_distance=cutoff,
                                                 method=method,
@@ -81,11 +81,11 @@ class GraphManager():
 
         # Loading SDF, if ligand in .sdf format
         if  self.mol_paths.ligand_path.suffix == '.sdf':
-            return chem.load_sdf(self.ligand_sdf, 
+            return utils.load_sdf(self.ligand_sdf, 
                                  sanitize=self.sanitize)[0]
 
         # Loading MOL2 if ligand in .mol2 format
-        return chem.load_mol(self.mol_paths.ligand_path,
+        return utils.load_mol(self.mol_paths.ligand_path,
                              sanitize=self.sanitize)
 
     def extract_graph_data(self, complex_id):

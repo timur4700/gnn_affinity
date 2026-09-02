@@ -1,5 +1,5 @@
 from utils import schemas
-from utils.chem import AtomFeatureExtract, ProteinFeatureExtract
+from chem.mol_features import AtomFeatureExtract, ProteinFeatureExtract
 
 
 

@@ -12,6 +12,7 @@ from graphs.configs.structure import GraphConfig
 from graphs import metadata as graph_metadata
 from graphs.data_preprocess import helpers, mp
 
+from tempfile import TemporaryDirectory
 
 
 def make_saving_paths(destination_path: Path,
@@ -53,7 +54,8 @@ def make_entries_path_data(dataset_metadata: metadata.DatasetMetadata):
 
 
 def calc_chunck_n_proc(entries_paths):
-    n_proc = 10#os.cpu_count()
+    print(f'AVAILABLE CPU: {os.cpu_count()}')
+    n_proc = os.cpu_count()
     chunk_size = helpers.chunk_size_calc(entries_paths,
                                          n_proc)
 
@@ -129,6 +131,13 @@ def make_postrocess_data(preprocess_data: graph_metadata.PreprocessingData):
                                preprocess_data.configs.graph_config)
 
 
+def start_convert(tmp_data: Path,
+                  graph_dataset_dest):
+    from graphs.data_preprocess import torch_convert
+    torch_convert.dataset_converter(tmp_data,
+                                    graph_dataset_dest)
+
+
 
 def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
                              destination_path: Path):
@@ -148,24 +157,30 @@ def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
     print(f"N_CPU: {preprocess_data.mp_config.n_proc}")
     print(f"CHUNK: {preprocess_data.mp_config.chunk_size}")
 
-    results = mp.mp_prepare(
-        graph_manager,
-        preprocess_data.saving_paths.graph_dataset,
-        preprocess_data.mp_config.n_proc,
-        preprocess_data.entries.paths,
-        preprocess_data.mp_config.chunk_size
-        )
+
+
+    with TemporaryDirectory(dir=preprocess_data.saving_paths.graph_dataset_dir) as tmp:
+
+        tmp = Path(tmp)
+        tmp_data_path = tmp / 'preprocessed_data.pkl'
+
+        results = mp.mp_prepare(
+            graph_manager,
+            tmp_data_path,
+            preprocess_data.mp_config.n_proc,
+            preprocess_data.entries.paths,
+            preprocess_data.mp_config.chunk_size
+            )
+
+        start_convert(tmp_data_path,
+                      preprocess_data.saving_paths.graph_dataset)
+
 
     collect_results(results,
-                    preprocess_data,
-                    graph_dataset_metadata)
+                        preprocess_data,
+                        graph_dataset_metadata)
 
     graph_dataset_metadata.save(preprocess_data.saving_paths.metadata)
     
     print(f"PDBbind Graph Dataset was successfully saved in\
            {str(preprocess_data.saving_paths.graph_dataset_dir)}")
-
-    
-
-
-    

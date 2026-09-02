@@ -1,13 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from utils.schemas import LigandData, ProteinData, Features
-from graphs import utils
-
-from torch_geometric.data import Data
 
 from typing import Any
 
 from pathlib import Path
-from graphs.configs import structure
+from chem import schemas
+
+from graphs import utils
 
 
 parent_path = Path(__file__).resolve().parent
@@ -22,7 +21,7 @@ class GraphBuilder(ABC):
     def prepare_graph(self,
                       ligand_data: LigandData,
                       protein_data: ProteinData,
-                      data: dict) -> Data: pass
+                      data: dict) -> schemas.MolGraph: pass
 
 
 

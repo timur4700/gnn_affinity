@@ -1,6 +1,5 @@
 from typing import Sequence, Any
 import pandas as pd
-import os
 
 from datasets.paths.register import PATHS_REGISTER
 from datasets.mol import register as mol_register
@@ -9,7 +8,7 @@ from models.build.model_register import MODEL_REGISTER
 
 from utils import general
 from utils.schemas import Features
-from utils.mol_features import (get_all_ligand_features,
+from chem.mol_features import (get_all_ligand_features,
                                 get_all_protein_features)
 
 from pathlib import Path

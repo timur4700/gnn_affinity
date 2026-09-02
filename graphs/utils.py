@@ -1,14 +1,13 @@
+import numpy as np
+from collections.abc import Callable
+from chem.schemas import MolGraph
+from chem import utils as chem_utils
 from rdkit import Chem
 
-import numpy as np
+from utils import schemas
 
-import torch
-from torch_geometric.data import Data
-
-from utils import schemas, chem
-
-from collections.abc import Callable
 from typing import Any
+
 
 
 
@@ -23,19 +22,19 @@ def add_feature_padding(ligand_features: dict[str, Callable],
 
 
 
-def add_ligand_protein_id(ligand_x: torch.Tensor,
-                        protein_x: torch.Tensor):
+def add_ligand_protein_id(ligand_x: np.ndarray,
+                        protein_x: np.ndarray):
 
     ligand_id = 0
     protein_id = 1
 
-    ligand_id = torch.tensor([ligand_id] * ligand_x.shape[0],
-                             dtype=torch.long).reshape(-1, 1)
+    ligand_id = np.array([ligand_id] * ligand_x.shape[0],
+                         dtype=np.int64).reshape(-1, 1)
 
-    protein_id = torch.tensor([protein_id] * protein_x.shape[0],
-                              dtype=torch.long).reshape(-1, 1)
+    protein_id = np.array([protein_id] * protein_x.shape[0],
+                              dtype=np.int64).reshape(-1, 1)
 
-    return torch.cat([ligand_id, protein_id], dim=0)
+    return np.concatenate([ligand_id, protein_id], axis=0)
 
 
 
@@ -73,8 +72,8 @@ def construct_feature_matrix(
 
     n_atoms = mol.GetNumAtoms()
 
-    ligand_features = ligand_features or chem.AtomFeatureExtract().extract_func()
-    protein_features = protein_features or chem.ProteinFeatureExtract().extract_func()
+    ligand_features = ligand_features or chem_utils.AtomFeatureExtract().extract_func()
+    protein_features = protein_features or chem_utils.ProteinFeatureExtract().extract_func()
 
     feature_dict = ligand_features if ligand else protein_features
 
@@ -98,28 +97,23 @@ def construct_feature_matrix(
 def construct_edge_matrix(mol: Chem.Mol,
                           **kwargs) -> schemas.LigandData | schemas.ProteinData:
 
-    a_matrix = chem.adjacency_matrix(mol, **kwargs)
-    edge_index = chem.to_sparse_adjacency_matrix(a_matrix)
+    a_matrix = chem_utils.adjacency_matrix(mol, **kwargs)
+    edge_index = chem_utils.to_sparse_adjacency_matrix(a_matrix)
 
 
     return edge_index
 
 
 
-def construct_interaction_edges(ligand_positions: np.ndarray | torch.Tensor,
-                                protein_positions: np.ndarray | torch.Tensor,
-                                cutoff: int | float=5) -> np.ndarray | torch.Tensor:
+def construct_interaction_edges(ligand_positions: np.ndarray,
+                                protein_positions: np.ndarray,
+                                cutoff: int | float=5) -> np.ndarray:
 
 
-    d_ij = chem.get_distance(ligand_positions,
+    d_ij = chem_utils.get_distance(ligand_positions,
                              protein_positions)
 
     cutoff_mask = d_ij <= cutoff
-
-    if (isinstance(ligand_positions, torch.Tensor) and
-        isinstance(protein_positions, torch.Tensor)):
-
-        return torch.nonzero(cutoff_mask).T
 
     return np.array(np.nonzero(cutoff_mask))
 
@@ -127,62 +121,61 @@ def construct_interaction_edges(ligand_positions: np.ndarray | torch.Tensor,
 
 
 def combine_edge_index(
-    ligand_edge_index: torch.Tensor,
-    protein_edge_index: torch.Tensor,
+    ligand_edge_index: np.ndarray,
+    protein_edge_index: np.ndarray,
     num_ligand_nodes: int,
-    interaction_edges: torch.Tensor=None,
-) -> torch.Tensor:
+    interaction_edges: np.ndarray=None,
+) -> np.ndarray:
 
     protein_edge_index = protein_edge_index + num_ligand_nodes
 
 
     if interaction_edges is not None:
 
-        interaction_edges = interaction_edges.clone()
+        interaction_edges = interaction_edges.copy()
         interaction_edges[1] += num_ligand_nodes
 
-        return torch.cat(
+        return np.concatenate(
             [
                 ligand_edge_index,
                 protein_edge_index,
                 interaction_edges,
             ],
-            dim=1,
+            axis=1,
         )
 
 
-    return torch.cat([
+    return np.concatenate([
         ligand_edge_index,
         protein_edge_index
-    ], dim=1)
+    ], axis=1)
 
 
 
 def add_edge_type(*args):
 
-    index_tensor = []
+    index_array = []
 
-    for i, tensor in enumerate(args):
+    for i, array in enumerate(args):
 
-        if tensor is None:
+        if array is None:
             continue
 
-        index_tensor.append(torch.tensor(
-            [i] * tensor.shape[-1], dtype=torch.float32
-        ))
+        index_array.append(np.array(
+            [i] * array.shape[-1], dtype=np.float32))
 
 
-    return torch.cat(index_tensor).reshape(-1, 1)
+    return np.concatenate(index_array).reshape(-1, 1)
 
 
-def add_edge_dist(edge_index: torch.Tensor,
-                  positions):
+def add_edge_dist(edge_index: np.ndarray,
+                  positions: np.ndarray):
 
     i, j = edge_index
     pos_i = positions[i]
     pos_j = positions[j]
 
-    d_ij = chem.get_distance(pos_i, pos_j)
+    d_ij = chem_utils.get_distance(pos_i, pos_j)
 
 
     return d_ij
@@ -232,9 +225,9 @@ def make_graph(data: schemas.LigandData | schemas.ProteinData,
                   undirected=True,
                   self_loop=False,
                   features: schemas.Features = None,
-                  cutoff: float=None) -> Data:
+                  cutoff: float=None) -> MolGraph:
 
-    graph = Data()
+    mol_graph = MolGraph()
 
     features = features if features is not None else schemas.Features()
 
@@ -243,39 +236,37 @@ def make_graph(data: schemas.LigandData | schemas.ProteinData,
                             self_loop=self_loop,
                             features=features)
 
-    data.convert2tensor()
+
+    mol_graph.x = data.atom_features
+    mol_graph.pos = data.positions
+    mol_graph.edge_index = data.edge_index
 
 
-    graph.x = data.atom_features
-    graph.pos = data.positions
-    graph.edge_index = data.edge_index
-
-
-    return graph
+    return mol_graph
 
     
 
-def combine_graphs(ligand_graph: Data,
-                   protein_graph: Data,
+def combine_graphs(ligand_graph: MolGraph,
+                   protein_graph: MolGraph,
                    add_interaction_edges: bool=False,
                    edge_type: bool=False,
-                   cutoff: int | float=5) -> Data:
+                   cutoff: int | float=5) -> MolGraph:
 
-    graph= Data()
+    mol_graph = MolGraph()
     interaction_edges = None
 
 
-    graph.x = torch.cat([ligand_graph.x,
+    mol_graph.x = np.concatenate([ligand_graph.x,
                    protein_graph.x],
-                   dim=0)
+                   axis=0)
 
 
 
-    graph.pos = torch.cat([ligand_graph.pos,
+    mol_graph.pos = np.concatenate([ligand_graph.pos,
                      protein_graph.pos],
-                     dim=0)
+                     axis=0)
 
-    graph.mol_id = add_ligand_protein_id(
+    mol_graph.mol_id = add_ligand_protein_id(
         ligand_graph.x,
         protein_graph.x
     )
@@ -287,11 +278,11 @@ def combine_graphs(ligand_graph: Data,
                                                         cutoff=cutoff)
 
         if isinstance(interaction_edges, np.ndarray):
-            interaction_edges = torch.tensor(interaction_edges, 
-                                             dtype=torch.long)
+            interaction_edges = np.array(interaction_edges, 
+                                             dtype=np.int64)
 
 
-    graph.edge_index = combine_edge_index(ligand_graph.edge_index,
+    mol_graph.edge_index = combine_edge_index(ligand_graph.edge_index,
                                     protein_graph.edge_index,
                                     ligand_graph.x.shape[0],
                                     interaction_edges)
@@ -300,18 +291,17 @@ def combine_graphs(ligand_graph: Data,
     # 0 -> ligand bonds; 1 -> protein bonds -> 2 interaction between ligand and protein
 
     if edge_type:
-        graph.edge_type = add_edge_type(ligand_graph.edge_index,
+        mol_graph.edge_type = add_edge_type(ligand_graph.edge_index,
                               protein_graph.edge_index,
                               interaction_edges)
 
 
-    return graph
+    return mol_graph
 
 
 
-def insert_data2graph(graph: Data,
-                      data: dict[str, Any],
-                      y_dtype: torch.dtype=torch.float32):
+def insert_data2graph(graph: MolGraph,
+                      data: dict[str, Any]):
 
     """
     The function that unserts data to torch_geometric.data.Data object
@@ -325,7 +315,7 @@ def insert_data2graph(graph: Data,
     for k, v in data.items():
 
         if k == 'y':
-            setattr(graph, k, torch.tensor(v, dtype=y_dtype))
+            setattr(graph, k, v)
             continue
 
         setattr(graph, k, v)
