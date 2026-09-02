@@ -1,8 +1,11 @@
 from typing import Sequence, Any
 import pandas as pd
 
+from graphs.metadata import PreprocessingData
+
 from datasets.paths.register import PATHS_REGISTER
-from datasets.mol import register as mol_register
+from datasets.mol import register as mol_register, configs
+from datasets.metadata import DatasetMetadata
 
 from models.build.model_register import MODEL_REGISTER
 
@@ -16,8 +19,13 @@ from pathlib import Path
 
 
 
-def get_path_builder(dataset_name: str):
-    return PATHS_REGISTER.get(dataset_name)()
+def get_path_builder(dataset_metadata: DatasetMetadata,
+                     preproc_data: PreprocessingData):
+    
+    name = dataset_metadata.name
+    mol_config: configs.MolConfig = preproc_data.configs.mol_config
+    
+    return PATHS_REGISTER.get(name).make(mol_config)
 
 
 

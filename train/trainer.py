@@ -210,16 +210,16 @@ class TrainerData():
 
         loaders = {
             'train': DataLoader(splited_dataset.train,
-                                       batch_size=self.batch_size,
-                                       shuffle=True),
+                                batch_size=self.batch_size,
+                                shuffle=True),
 
             'val': DataLoader(splited_dataset.val,
-                                     batch_size=self.batch_size,
-                                     shuffle=False),
+                              batch_size=self.batch_size,
+                              shuffle=False),
 
             'test': DataLoader(splited_dataset.test,
-                                      batch_size=self.batch_size,
-                                      shuffle=False)
+                               batch_size=self.batch_size,
+                               shuffle=False)
         }
 
         return loaders

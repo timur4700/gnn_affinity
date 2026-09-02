@@ -99,7 +99,8 @@ def make_preproc_data(dataset_metadata,
 def make_graph_manager(dataset_metadata: metadata.DatasetMetadata,
                        preproc_data: graph_metadata.PreprocessingData):
 
-    path_builder = helpers.get_path_builder(dataset_metadata.name)
+    path_builder = helpers.get_path_builder(dataset_metadata,
+                                            preproc_data)
 
     graph_builder=GeneralGraphBuilder(preproc_data.configs.graph_config, 
                                       preproc_data.configs.features)
@@ -125,14 +126,14 @@ def make_graph_dataset_meta(preprocess_data: graph_metadata.PreprocessingData,
 
 
 
-def make_postrocess_data(preprocess_data: graph_metadata.PreprocessingData):
+def make_postrocess_data(preprocess_data: graph_metadata.PreprocessingData) -> GraphDatasetMeta:
 
     return make_graph_metadata(preprocess_data.configs.features,
                                preprocess_data.configs.graph_config)
 
 
 def start_convert(tmp_data: Path,
-                  graph_dataset_dest):
+                  graph_dataset_dest) -> None:
     from graphs.data_preprocess import torch_convert
     torch_convert.dataset_converter(tmp_data,
                                     graph_dataset_dest)
@@ -160,7 +161,6 @@ def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
 
 
     with TemporaryDirectory(dir=preprocess_data.saving_paths.graph_dataset_dir) as tmp:
-
         tmp = Path(tmp)
         tmp_data_path = tmp / 'preprocessed_data.pkl'
 
@@ -177,8 +177,8 @@ def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
 
 
     collect_results(results,
-                        preprocess_data,
-                        graph_dataset_metadata)
+                    preprocess_data,
+                    graph_dataset_metadata)
 
     graph_dataset_metadata.save(preprocess_data.saving_paths.metadata)
     

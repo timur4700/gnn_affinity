@@ -1,7 +1,7 @@
 import torch
 from torch.nn import Module, Linear, Sequential, Dropout, SiLU  
 from models.nn.utils import make_normalization,make_act_function, DropoutEdge
-#from torch_geometric.nn import GraphNorm, GCNConv, GINConv, GINEConv, GATConv, GATv2Conv
+from torch_geometric.nn import GraphNorm, GCNConv, GINConv, GINEConv, GATConv, GATv2Conv
 
 from models.nn import utils
 

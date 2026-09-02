@@ -48,20 +48,20 @@ class GraphManager():
         
     def load_protein(self,
                      ligand: Chem.Mol=None,
-                     sanitize: bool=False,
-                     extract_near_res: bool=True,
-                     method: str='atom',
-                     cutoff: float=10.0) -> Chem.Mol:
+                     extract_pocket: bool=True,
+                     extract_method: str='atom',
+                     pocket_cutoff: float=10.0,
+                     sanitize: bool=False) -> Chem.Mol:
 
         
         protein = Chem.MolFromPDBFile(self.mol_paths.protein_path, 
                                       sanitize=sanitize)
 
-        if extract_near_res:
+        if extract_pocket:
             return protein_chem.pocket_extraction(ligand,
                                                 protein,
-                                                cutoff_distance=cutoff,
-                                                method=method,
+                                                cutoff_distance=pocket_cutoff,
+                                                method=extract_method,
                                                 sanitize=self.sanitize)
 
 

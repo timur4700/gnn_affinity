@@ -1,5 +1,7 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields, field
 from collections.abc import Callable
+
+from typing import Any, Sequence
 
 from pathlib import Path
 
@@ -8,6 +10,28 @@ import numpy as np
 
 from utils import general
 
+
+
+
+
+def option_checker(obj):
+    for field in fields(obj):
+        if 'options' in field.metadata:
+            options = field.metadata['options']
+            option_name = field.name
+
+            value = getattr(obj, option_name)
+
+            if value not in options:
+                raise ValueError(f'Unrecognized option {value}')
+
+
+
+def make_option_field(default_value: Any,
+                      options: Sequence[Any]):
+    
+    return field(default=default_value,
+                 metadata={'options': set(options)}) 
 
 
 

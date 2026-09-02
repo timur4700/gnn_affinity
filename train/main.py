@@ -33,10 +33,11 @@ def start_trainer(model_metadata: dict[str, Any],
 
     model = model_register.MODEL_REGISTER.get(model_name, None)
 
+
     if not model:
         print('Model not found\nClose...')
 
-    model: Module = model().model_class(**model_config).to(trainer_config['device'])
+    model: Module = model().model_class()(**model_config).to(trainer_config['device'])
 
 
     model_trainer = trainer.Trainer(**trainer_config)

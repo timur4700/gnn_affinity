@@ -1,7 +1,7 @@
 from datasets.mol import configs
 from pathlib import Path
 
-PARENT =Path(__file__).parents[1]
+PARENT = Path(__file__).parents[1]
 
 
 MOL_CONFIG = {

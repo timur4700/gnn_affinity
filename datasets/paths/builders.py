@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Literal
 from abc import ABC, abstractmethod
 
+from datasets.mol import configs
+
 
 
 class PathBuilder(ABC):
@@ -27,17 +29,30 @@ class PathBuilder(ABC):
 class PDBbindPaths(PathBuilder):
     def __init__(self,
                  pocket: bool=True,
-                 ligand_file_format: 
+                 ligand: 
                  Literal['mol2, sdf'] = 'mol2'):
 
         
         self.protein_format = '{}' + f"_{'pocket' if pocket else 'protein'}.pdb"
-        self.ligand_format = '{}' + f'_ligand.{ligand_file_format}'
+        self.ligand_format = '{}' + f'_ligand.{ligand}'
+
+    @classmethod
+    def make(cls, mol_config: configs.PDBbindMolConfig):
+
+        is_pocket = mol_config.prot_source == 'pocket'
+
+        if not is_pocket:
+            if not mol_config.protein.extract_pocket:
+                raise ValueError('Due to memory safety, turn on pocket extraction, when selecting <protein> as main source')
+
+        return cls(
+            pocket=is_pocket,
+            ligand=mol_config.formats.ligand
+        )
 
 
     def build(self, complex_dir: Path):
         pdb_name = complex_dir.name
-
 
         return schemas.MolPaths(ligand_path=complex_dir/self.ligand_format.format(pdb_name),
                                 protein_path=complex_dir/self.protein_format.format(pdb_name))
