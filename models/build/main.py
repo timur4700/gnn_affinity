@@ -1,24 +1,26 @@
 from pathlib import Path
 from models.build import utils
-from models.build import model_register
-from models.build import metadata
+from registers.models.models import MODEL_REGISTER
+from metadata.model import ModelMetaData
 
 
-def build_model(dataset_directory: Path,
-                model_name: str):
+def build_model(dataset_directory: Path):
 
     dataset_parent_directory = dataset_directory.parent
     dataset_metadata = utils.find_metadata(dataset_directory)
 
+    model_name = dataset_metadata['model']
     dataset_id = dataset_metadata['id']
 
     if not utils.check_metadata(dataset_metadata, 
                                 model_name):
+
+        print('Model Metadata was not found')
         print('Closing the program')
         return
+    
 
-    model_factory = model_register.MODEL_REGISTER.get(model_name,
-                                                      None)   
+    model_factory = MODEL_REGISTER.get(model_name, None)   
 
     if not model_factory:
         print(f'The requested model {model_name} was not found in the registry')
@@ -33,11 +35,11 @@ def build_model(dataset_directory: Path,
     model_data = model_factory()
     model_params = model_data.custom_params['ModelSettings']
 
-    model_metadata = metadata.ModelMetaData(model_name=model_name,
-                                       id=dataset_id,
-                                       model_params=model_params,
-                                       dataset_metadata=dataset_metadata,
-                                       model_saved_params=str(model_directory['params']))
+    model_metadata = ModelMetaData(model_name=model_name,
+                                   id=dataset_id,
+                                   model_params=model_params,
+                                   dataset_metadata=dataset_metadata,
+                                   model_saved_params=str(model_directory['params']))
 
 
 

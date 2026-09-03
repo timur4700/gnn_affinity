@@ -8,7 +8,7 @@ from torch_geometric.loader import DataLoader
 from train import utils
 from train import predictor
 
-from utils.schemas import DataSetSplited
+from schemas.train import DataSetSplited
 from tqdm import tqdm
 
 

@@ -2,12 +2,10 @@ import os
 import tarfile
 from tqdm import tqdm
 from datasets.pdbbind import index_data_prep
-from datasets import metadata
+from metadata.datasets import DatasetMetadata
 
 import shutil
 import re
-
-from utils import general
 
 from pathlib import Path
 
@@ -58,7 +56,7 @@ def tar_extract(directory_path: Path) -> dict[str, Path]:
 
 def merge_folders(directory_path: Path,
                   folders: dict[str, Path],
-                  metadata: metadata.DatasetMetadata):
+                  metadata: DatasetMetadata):
 
     entry_name = 'pdbbind_2020_entries'
     entries_path = directory_path / entry_name
@@ -93,7 +91,7 @@ def merge_folders(directory_path: Path,
 
 def main(directory_path: Path):
 
-    dataset_metadata = metadata.DatasetMetadata(
+    dataset_metadata = DatasetMetadata(
         name='pdbbind'
     )
 
@@ -112,6 +110,5 @@ def main(directory_path: Path):
     dataset_metadata.target_path = csv_data_path
     dataset_metadata.save(directory_path / 'metadata.json')
 
-    mol_config = general.load_yaml(mol_config_path)
 
     print(f'File with target variable saved in  {csv_data_path}') 

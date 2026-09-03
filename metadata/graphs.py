@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from utils.schemas import MetaData
+from schemas.general import MetaData
 
-from typing import Literal
-
+from typing import Literal, Any
+from pathlib import Path
 
 
 @dataclass
@@ -13,8 +13,16 @@ class GraphMetadata(MetaData):
     ligand_features: list[str]=field(default_factory=list)
     protein_features: list[str]=field(default_factory=list)
 
-    graph_type: Literal['2d', '3d']='2d'
-    include_edge_attr: bool=False
-    include_inter_edges: bool=False
-    intra_cutoff: float=0.0
-    inter_cutoff: float=0.0
+    graph_config: Any = None
+
+
+
+@dataclass
+class GraphDatasetMeta(MetaData):
+    name: str=''
+    id: str=''
+    model: str=''
+    status: Literal['writing', 'failed', 'completed']='writing'
+    graph_num: int=0
+    graph_config_metadata: GraphMetadata=field(default_factory=GraphMetadata)
+    dataset_path: Path=None

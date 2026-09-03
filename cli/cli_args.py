@@ -21,15 +21,18 @@ def make_parser():
 
 
     # Dataset SubProgram commands
-    prepare_dataset = dataset_commands.add_parser('prepare')
+    prepare_dataset = dataset_commands.add_parser('prepare',
+                                                  help='Prepare raw dataset')
 
 
 
     prepare_dataset.add_argument('-d', '--dataset', 
-                         required=True)
+                                 required=True,
+                                 help='Name of the dataset for preparing')
 
     prepare_dataset.add_argument('-i', '--input',
-                         required=True)
+                                 required=True,
+                                 help='Path to raw dataset directory')
 
     prepare_dataset.set_defaults(func=commands.run_dataset_preparation)
 
@@ -69,11 +72,9 @@ def make_parser():
     model_build = model_commands.add_parser('build', 
                                             help='Build registered DL model in the program')
     
-    model_build.add_argument('-m', '--model', required=True,
-                             help='Model name')
     
     model_build.add_argument('-i', '--input', required=True,
-                             help='Path to prepared dataset')
+                             help='Path to prepared dataset directory')
     
     model_build.set_defaults(func=commands.run_model_prep)
 
@@ -87,6 +88,9 @@ def make_parser():
 
     model_list = model_commands.add_parser('list', help='Show available models')
     model_list.set_defaults(func=commands.get_model_list)
+
+    dataset_list = dataset_commands.add_parser('list', help='Show available dataset to parse')
+    dataset_list.set_defaults(func=commands.get_dataset_list)
 
 
     return parser

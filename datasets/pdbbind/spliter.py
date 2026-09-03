@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Any
-from utils.schemas import DataSetSplited
+from schemas.train import DataSetSplited
 
 
 

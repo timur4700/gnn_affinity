@@ -1,12 +1,10 @@
 from abc import ABC
-from utils.schemas import LigandData, ProteinData, Features
-
-from typing import Any
+from schemas.mol import LigandData, ProteinData, Features, MolGraph
 
 from pathlib import Path
-from chem import schemas
 
 from graphs import utils
+from configs.graph import ComplexGraphConfig
 
 
 parent_path = Path(__file__).resolve().parent
@@ -21,8 +19,7 @@ class GraphBuilder(ABC):
     def prepare_graph(self,
                       ligand_data: LigandData,
                       protein_data: ProteinData,
-                      data: dict) -> schemas.MolGraph: pass
-
+                      data: dict) -> MolGraph: pass
 
 
 
@@ -41,7 +38,7 @@ class GeneralGraphBuilder(GraphBuilder):
                  graph_config,
                  features: Features):
 
-        self.graph_config = graph_config
+        self.graph_config: ComplexGraphConfig = graph_config
         self.features = features
     
     def prepare_graph(self, 
@@ -50,12 +47,12 @@ class GeneralGraphBuilder(GraphBuilder):
   
     
         ligand_graph = utils.make_graph(ligand_data,
-                                           **self.graph_config.graph,
-                                           features=self.features)
+                                        **self.graph_config.ligand,
+                                        features=self.features)
             
         protein_graph = utils.make_graph(protein_data, 
-                                        **self.graph_config.graph,
-                                        features=self.features)
+                                         **self.graph_config.protein,
+                                         features=self.features)
     
         graph = utils.combine_graphs(ligand_graph,
                                      protein_graph,

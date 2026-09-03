@@ -1,4 +1,4 @@
-from chem.schemas import MolGraph
+from schemas.mol import MolGraph
 from utils import general
 
 from typing import Any

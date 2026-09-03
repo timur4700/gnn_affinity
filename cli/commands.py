@@ -1,18 +1,14 @@
-from datasets import register as dataset_register
 from pathlib import Path
 from utils import general
 
-import os
+from registers import datasets
+from metadata.datasets import DatasetMetadata
 
-def limit_threads():
-    os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ["MKL_NUM_THREADS"] = "1"
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"
-    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+import os
 
 
 def run_dataset_preparation(args):
-    module = dataset_register.get_dataset_module(args.dataset)
+    module = datasets.get_dataset_module(args.dataset)
     module.prepare(args.input)
 
 
@@ -28,10 +24,9 @@ def run_graph_config(args):
 
 
 def run_graph_preparation(args):
-    limit_threads()
+    general.limit_threads()
+    
     from graphs.data_preprocess import prepare
-    from datasets.metadata import DatasetMetadata
-
 
     dataset_meta_path = Path(args.input)
     dataset_metadata = DatasetMetadata(**general.load_json(dataset_meta_path))
@@ -43,13 +38,25 @@ def run_graph_preparation(args):
 
 
 def get_model_list(args):
-    from models.build.model_register import MODEL_REGISTER
+    from registers.models.models import MODEL_REGISTER
 
     print('\nAvailable Models:')
     print('-----------------')
 
     for k in MODEL_REGISTER.keys():
         print(f"- {k}")
+
+
+def get_dataset_list(args):
+    from registers.datasets import DATASET_REGISTER
+
+    print('\nAvailable Datasets:')
+    print('-----------------')
+
+    for k in DATASET_REGISTER.keys():
+        print(f"- {k}")
+
+
 
 
 def run_model_prep(args):

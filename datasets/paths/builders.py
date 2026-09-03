@@ -1,10 +1,8 @@
-from utils import schemas
+from schemas.mol import MolPaths
 from pathlib import Path
 from typing import Literal
 from abc import ABC, abstractmethod
-
-from datasets.mol import configs
-
+from configs import mol
 
 
 class PathBuilder(ABC):
@@ -21,7 +19,7 @@ class PathBuilder(ABC):
 
 
     @abstractmethod
-    def build(self, complex_dir) -> schemas.MolPaths:
+    def build(self, complex_dir) -> MolPaths:
         pass
 
 
@@ -37,7 +35,7 @@ class PDBbindPaths(PathBuilder):
         self.ligand_format = '{}' + f'_ligand.{ligand}'
 
     @classmethod
-    def make(cls, mol_config: configs.PDBbindMolConfig):
+    def make(cls, mol_config: mol.PDBbindMolConfig):
 
         is_pocket = mol_config.prot_source == 'pocket'
 
@@ -54,5 +52,5 @@ class PDBbindPaths(PathBuilder):
     def build(self, complex_dir: Path):
         pdb_name = complex_dir.name
 
-        return schemas.MolPaths(ligand_path=complex_dir/self.ligand_format.format(pdb_name),
+        return MolPaths(ligand_path=complex_dir/self.ligand_format.format(pdb_name),
                                 protein_path=complex_dir/self.protein_format.format(pdb_name))

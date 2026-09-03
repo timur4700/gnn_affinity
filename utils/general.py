@@ -60,6 +60,14 @@ def unpack_pickle(path: Path):
 
 
 
+def limit_threads():
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
+
+
 def limit_native_threads(n: str='1'):
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
                 "VECLIB_MAXIMUM_THREADS", "MKL_NUM_THREADS",

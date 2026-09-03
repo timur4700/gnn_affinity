@@ -1,12 +1,12 @@
 from utils import general
-from utils.db_call import ModelDB, DatasetDB
+from utils.db_call import ModelDB
 from pathlib import Path
 import shutil
 
 from typing import Tuple
 
-from datasets.mol.register import load_config_path
-from datasets.metadata import DatasetMetadata
+from registers.configs.mol import load_config_path
+from metadata.datasets import DatasetMetadata
 
 
 def load_dataset_metadata(dataset_directory: Path):

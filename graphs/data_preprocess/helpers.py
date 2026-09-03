@@ -1,16 +1,20 @@
 from typing import Sequence, Any
 import pandas as pd
 
-from graphs.metadata import PreprocessingData
+from configs.preprocessing import PreprocessingData
+from configs.mol import MolConfig
 
-from datasets.paths.register import PATHS_REGISTER
-from datasets.mol import register as mol_register, configs
-from datasets.metadata import DatasetMetadata
+from registers.path_builders import PATHS_REGISTER
+from registers.configs.mol import MOL_CONFIG
+from registers.models.models import MODEL_REGISTER
 
-from models.build.model_register import MODEL_REGISTER
+
+from metadata.datasets import DatasetMetadata
+
+from schemas.mol import Features
 
 from utils import general
-from utils.schemas import Features
+
 from chem.mol_features import (get_all_ligand_features,
                                 get_all_protein_features)
 
@@ -30,7 +34,7 @@ def get_path_builder(dataset_metadata: DatasetMetadata,
                      preproc_data: PreprocessingData):
     
     name = dataset_metadata.name
-    mol_config: configs.MolConfig = preproc_data.configs.mol_config
+    mol_config: MolConfig = preproc_data.configs.mol_config
     
     return PATHS_REGISTER.get(name).make(mol_config)
 
@@ -59,7 +63,7 @@ def load_mol_config(config_path,
                     dataset_name: str):
     
     raw_config = general.load_yaml(config_path)
-    config_schema = mol_register.MOL_CONFIG.get(dataset_name)
+    config_schema = MOL_CONFIG.get(dataset_name)
 
     return config_schema.load_data(raw_config['MolConfig'])
 

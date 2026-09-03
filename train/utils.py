@@ -6,7 +6,7 @@ from scipy.stats import pearsonr, spearmanr
 import numpy as np
 
 from torch_geometric.data import Data
-from utils.schemas import DataSetSplited
+from schemas.train import DataSetSplited
 
 from typing import Literal, Any
 import os

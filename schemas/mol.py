@@ -1,10 +1,17 @@
 from dataclasses import dataclass
 import numpy as np
 
+from pathlib import Path
 from typing import Any
 from collections.abc import Callable
 
 from rdkit import Chem
+
+
+@dataclass
+class MolPaths:
+    ligand_path: Path = None
+    protein_path: Path = None
 
 
 
@@ -20,6 +27,8 @@ class Data:
 @dataclass
 class LigandData(Data):
     pass
+
+
 
 @dataclass
 class ProteinData(Data):

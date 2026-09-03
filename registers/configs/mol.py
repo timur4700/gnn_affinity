@@ -1,14 +1,14 @@
-from datasets.mol import configs
+from configs import mol
 from pathlib import Path
 
-PARENT = Path(__file__).parents[1]
+PARENT = Path(__file__).parents[2]
 
 
 MOL_CONFIG = {
-    'pdbbind':  configs.PDBbindMolConfig
+    'pdbbind':  mol.PDBbindMolConfig
     }
 
 
 
 def load_config_path(dataset_name: str):
-    return (PARENT / dataset_name / 'config.yaml').resolve()
+    return (PARENT / 'datasets' / 'configs' / f'{dataset_name}.yaml').resolve()

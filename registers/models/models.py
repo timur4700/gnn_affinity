@@ -1,9 +1,7 @@
-from models.build import model_loaders
-
-
+from registers.models import loaders
 
 
 
 MODEL_REGISTER = {
-    'egnn_interaction': model_loaders.egnn_interaction_loader
+    'egnn_interaction': loaders.egnn_interaction_loader
 }

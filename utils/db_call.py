@@ -1,5 +1,5 @@
-from models.build.model_register import MODEL_REGISTER
-from datasets.register import DATASET_REGISTER
+from registers.models.models import MODEL_REGISTER
+from registers.datasets import DATASET_REGISTER
 
 from typing import Any
 

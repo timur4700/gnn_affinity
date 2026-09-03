@@ -1,12 +1,12 @@
 import numpy as np
 from collections.abc import Callable
-from chem.schemas import MolGraph
+from schemas.mol import MolGraph
 from chem import utils as chem_utils
 from rdkit import Chem
 
-from utils import schemas
+from schemas import mol
 
-from typing import Any
+from typing import Any, Literal
 
 
 
@@ -94,14 +94,25 @@ def construct_feature_matrix(
 
 
 
-def construct_edge_matrix(mol: Chem.Mol,
-                          **kwargs) -> schemas.LigandData | schemas.ProteinData:
+def construct_edge_matrix_2d(mol: Chem.Mol,
+                          **kwargs) -> np.ndarray:
 
     a_matrix = chem_utils.adjacency_matrix(mol, **kwargs)
     edge_index = chem_utils.to_sparse_adjacency_matrix(a_matrix)
 
 
     return edge_index
+
+
+def construct_edge_matrix_3d(positions: np.ndarray,
+                             intra_cutoff) -> np.ndarray:
+
+    d_ij = chem_utils.get_distance(positions,
+                                   positions)
+
+    cutoff_mask = d_ij <= intra_cutoff
+
+    return np.array(np.nonzero(cutoff_mask))
 
 
 
@@ -111,11 +122,11 @@ def construct_interaction_edges(ligand_positions: np.ndarray,
 
 
     d_ij = chem_utils.get_distance(ligand_positions,
-                             protein_positions)
+                                   protein_positions)
 
     cutoff_mask = d_ij <= cutoff
 
-    return  np.array(np.nonzero(cutoff_mask))
+    return np.array(np.nonzero(cutoff_mask))
 
 
 
@@ -182,20 +193,22 @@ def add_edge_dist(edge_index: np.ndarray,
 
 
 
-def prepare_mol_data(data: schemas.LigandData | schemas.ProteinData,
+def prepare_mol_data(data: mol.LigandData | mol.ProteinData,
                      undirected=True,
                      self_loop=False,
-                     features: schemas.Features = None):
+                     features: mol.Features = None,
+                     graph_type: Literal['2d', '3d']='2d',
+                     intra_cutoff: float=5.0):
 
     """
     Main data preparation function
     
     """
 
-    if isinstance(data, schemas.LigandData):
+    if isinstance(data, mol.LigandData):
         ligand = True
 
-    elif isinstance(data, schemas.ProteinData):
+    elif isinstance(data, mol.ProteinData):
         ligand = False
 
     else:
@@ -211,30 +224,41 @@ def prepare_mol_data(data: schemas.LigandData | schemas.ProteinData,
 
 
     # Preparing Edge Index
-    data.edge_index = construct_edge_matrix(data.mol,
-                                            undirected=undirected,
-                                            self_loop=self_loop)
 
+    if graph_type == '2d':
+        data.edge_index = construct_edge_matrix_2d(data.mol,
+                                                undirected=undirected,
+                                                self_loop=self_loop)
+
+    elif graph_type == '3d':
+        data.edge_index = construct_edge_matrix_3d(data.positions,
+                                                   intra_cutoff=intra_cutoff)
+
+    else:
+        raise ValueError(f'Unrecognized Option for Type of Graph: {graph_type}')
 
 
     return data
 
 
 
-def make_graph(data: schemas.LigandData | schemas.ProteinData,
+def make_graph(data: mol.LigandData | mol.ProteinData,
                undirected=True,
                self_loop=False,
-               features: schemas.Features = None,
-               cutoff: float=None) -> MolGraph:
+               features: mol.Features = None,
+               graph_type: Literal['2d', '3d']='2d',
+               intra_cutoff: float=5.0) -> MolGraph:
 
     mol_graph = MolGraph()
 
-    features = features if features is not None else schemas.Features()
+    features = features if features is not None else mol.Features()
 
     data = prepare_mol_data(data, 
                             undirected=undirected,
                             self_loop=self_loop,
-                            features=features)
+                            features=features,
+                            graph_type=graph_type,
+                            intra_cutoff=intra_cutoff)
 
 
     mol_graph.x = data.atom_features
@@ -250,7 +274,7 @@ def combine_graphs(ligand_graph: MolGraph,
                    protein_graph: MolGraph,
                    add_interaction_edges: bool=False,
                    edge_type: bool=False,
-                   cutoff: int | float=5) -> MolGraph:
+                   inter_cutoff: int | float=5) -> MolGraph:
 
     mol_graph = MolGraph()
     interaction_edges = None
@@ -275,7 +299,7 @@ def combine_graphs(ligand_graph: MolGraph,
     if add_interaction_edges:
         interaction_edges = construct_interaction_edges(ligand_graph.pos,
                                                         protein_graph.pos,
-                                                        cutoff=cutoff)
+                                                        cutoff=inter_cutoff)
 
 
     mol_graph.edge_index = combine_edge_index(ligand_graph.edge_index,

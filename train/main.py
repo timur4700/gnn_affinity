@@ -1,5 +1,5 @@
 from torch.nn import Module
-from train import spliters
+from registers import spliters
 from train import trainer
 from utils import general
 
@@ -7,7 +7,8 @@ from pathlib import Path
 
 from typing import Any
 
-from models.build import model_register
+from registers.models.models import MODEL_REGISTER
+
 from train.utils import save_model_run, check_device
 
 
@@ -25,13 +26,13 @@ def start_trainer(model_metadata: dict[str, Any],
 
     dataset = general.unpack_pickle(dataset_path)
 
-    spliter = spliters.SPLITERS.get(dataset_metadata['tag'],
+    spliter = spliters.SPLITERS.get(dataset_metadata['name'],
                                     spliters.SPLITERS['default'])
 
     model_name = model_metadata['model_name']
     model_config = general.load_yaml(model_metadata['model_config_path'])['ModelSettings']
 
-    model = model_register.MODEL_REGISTER.get(model_name, None)
+    model = MODEL_REGISTER.get(model_name, None)
 
 
     if not model:
@@ -58,10 +59,3 @@ def start_trainer(model_metadata: dict[str, Any],
                    config,
                    metrics,
                    model_trainer.train_log)
-
-
-
-
-
-
-    

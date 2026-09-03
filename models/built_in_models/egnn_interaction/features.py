@@ -1,4 +1,4 @@
-from utils import schemas
+from schemas.mol import Features
 from chem.mol_features import AtomFeatureExtract, ProteinFeatureExtract
 
 
@@ -12,4 +12,4 @@ def egnn_interaction_features():
         'num_hudrogens': AtomFeatureExtract.get_num_h_bonds
     }
 
-    return schemas.Features(features, features)
+    return Features(features, features)

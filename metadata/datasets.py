@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from utils.schemas import MetaData
+from schemas.general import MetaData
 
 
 

@@ -1,12 +1,12 @@
-from models.build.schemas import Model
+from schemas.model import Model
 from pathlib import Path
 from utils import general
 
-from models.build.associated_graphs import MODEL2GRAPH
-from graphs import register
+from registers.models.graphs import MODEL2GRAPH
+from registers.graph_builders import GRAPH_TYPES
 
 
-settings_path = Path(__file__).resolve().parent.parent / 'built_in_models' / 'all_settings'
+settings_path = Path(__file__).resolve().parents[2] / 'models' / 'built_in_models' / 'all_settings'
 
 
 
@@ -18,7 +18,7 @@ def bind_graphs2model(model_name):
         raise ValueError(f'The associated graphs with the model {model_name}\
                          were not found. Closing program')
 
-    return [register.GRAPH_TYPES.get(graph) for graph
+    return [GRAPH_TYPES.get(graph) for graph
             in graph_names]
 
     

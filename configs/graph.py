@@ -5,14 +5,15 @@ from typing import Any
 
 
 @dataclass
-class GraphConfig:
-    graph: dict[str, Any]
+class ComplexGraphConfig:
+    ligand: dict[str, Any]
+    protein: dict[str, Any]
     interaction: dict[str, Any]
-
 
     @classmethod
     def load_data(cls, data: dict):
         return cls(
-            graph=data['Graph'],
+            ligand=data['Graph']['Ligand'],
+            protein=data['Graph']['Protein'],
             interaction=data['Interaction']
         )

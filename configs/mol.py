@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Literal
-from utils import schemas
+from schemas import general
+from utils import options
 
 
 
@@ -8,31 +9,31 @@ from utils import schemas
 
 @dataclass
 class Formats:
-    ligand: Literal['sdf', 'mol2'] = schemas.make_option_field('mol2',
+    ligand: Literal['sdf', 'mol2'] = options.make_option_field('mol2',
                                                                ['mol2', 'sdf'])
 
     def __post_init__(self):
-        schemas.option_checker(self)
+        general.option_checker(self)
 
 
 @dataclass
 class LigandConfig:
-    sanitize: bool = schemas.make_option_field(False,
+    sanitize: bool = general.make_option_field(False,
                                                [True, False])
 
 @dataclass
 class ProteinConfig:
-    extract_pocket: bool = schemas.make_option_field(True,
+    extract_pocket: bool = options.make_option_field(True,
                                                      [True, False])
 
 
-    extract_method: Literal['atom', 'cog', 'com'] = schemas.make_option_field('atom',
+    extract_method: Literal['atom', 'cog', 'com'] = options.make_option_field('atom',
                                                                               ['atom', 'cog', 'com'])
     pocket_cutoff: float=10.0
     sanitize: bool = False
 
     def __post_init__(self):
-        schemas.option_checker(self)
+        options.option_checker(self)
 
 
 
@@ -56,12 +57,12 @@ class MolConfig:
 
 @dataclass
 class PDBbindMolConfig(MolConfig):
-    prot_source: Literal['pocket', 'protein'] = schemas.make_option_field('pocket',
+    prot_source: Literal['pocket', 'protein'] = options.make_option_field('pocket',
                                                                           ['pocket', 'protein'])
 
 
     def __post_init__(self):
-        schemas.option_checker(self)
+        options.option_checker(self)
 
 
 
@@ -75,4 +76,3 @@ class PDBbindMolConfig(MolConfig):
             protein=mol_base.protein,
             prot_source=data['ProteinSource']
         )
-    

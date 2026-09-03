@@ -1,6 +1,4 @@
 from typing import Any
-from datasets import path_builders
-from utils import schemas
 
 
 from graphs.maker.builders import GraphBuilder
@@ -10,16 +8,19 @@ from pathlib import Path
 from rdkit import Chem
 from chem import protein_chem, utils
 
-from datasets.pdbbind.metadata import MolConfig
+
+from configs.mol import MolConfig
+from schemas.mol import LigandData, ProteinData
 
 from dataclasses import asdict
 
+from datasets.paths.builders import PathBuilder
 
 
 
 class GraphManager():
     def __init__(self,
-                 path_builder: path_builders.PathBuilder,
+                 path_builder: PathBuilder,
                  graph_builder: GraphBuilder,
                  target_data: dict[str, Any],
                  mol_config: MolConfig,
@@ -94,8 +95,8 @@ class GraphManager():
 
     def init_graph_preparation(self):
 
-        self.ligand_data = schemas.LigandData(mol=self.load_ligand())
-        self.protein_data = schemas.ProteinData(mol=self.load_protein(self.ligand_data.mol,
+        self.ligand_data = LigandData(mol=self.load_ligand())
+        self.protein_data = ProteinData(mol=self.load_protein(self.ligand_data.mol,
                                                                       **asdict(self.mol_config.protein)))
 
         data = self.extract_graph_data(self.complex_name)
