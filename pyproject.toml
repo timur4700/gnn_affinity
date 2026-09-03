@@ -26,4 +26,14 @@ gnn-affinity = "main:main"
 py-modules = ["main"]
 
 [tool.setuptools.packages.find]
-include = ["cli*", "train*", "models*", "datasets*", "utils*"]
+include = ["cli*",
+           "chem*",
+           "configs*",
+           "graphs*",
+           "metadata*",
+           "registers*",
+           "schemas*",
+           "train*", 
+           "models*", 
+           "datasets*", 
+           "utils*"]

@@ -77,4 +77,4 @@ def mp_prepare(graph_manager: GraphManager,
                 pool.join()
 
 
-                return graphs_prepared, failed_complexes
+        return graphs_prepared, failed_complexes

@@ -54,7 +54,7 @@ def general_spliter(dataset: list[Data],
     total = len(dataset)
 
 
-    test_frac = train_frac - val_frac
+    test_frac = 1.0 - train_frac - val_frac
 
     if train_frac + val_frac + test_frac > 1.0:
         raise ValueError('Split fractions exceed 1')

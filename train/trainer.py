@@ -11,6 +11,7 @@ from train import predictor
 from schemas.train import DataSetSplited
 from tqdm import tqdm
 
+import copy
 
 
 
@@ -121,7 +122,7 @@ class Trainer():
             if mean_val_loss < best_val_loss:
                 best_val_loss = mean_val_loss 
                 best_epoch = i_epoch
-                self.best_model_val_loss_param = self.model.state_dict()
+                self.best_model_val_loss_param = copy.deepcopy(self.model.state_dict())
 
                   
         

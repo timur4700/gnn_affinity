@@ -18,8 +18,7 @@ class GraphBuilder(ABC):
 
     def prepare_graph(self,
                       ligand_data: LigandData,
-                      protein_data: ProteinData,
-                      data: dict) -> MolGraph: pass
+                      protein_data: ProteinData) -> MolGraph: pass
 
 
 

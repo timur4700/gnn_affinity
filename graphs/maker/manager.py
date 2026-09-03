@@ -80,14 +80,17 @@ class GraphManager():
         rdkit.Chem.Mol
         """
 
-        # Loading SDF, if ligand in .sdf format
-        if  self.mol_paths.ligand_path.suffix == '.sdf':
-            return utils.load_sdf(self.ligand_sdf, 
-                                 sanitize=self.sanitize)[0]
-
         # Loading MOL2 if ligand in .mol2 format
-        return utils.load_mol(self.mol_paths.ligand_path,
+        ligand = utils.load_mol(self.mol_paths.ligand_path,
                              sanitize=self.sanitize)
+
+
+        if self.mol_paths.ligand_path.suffix == '.sdf':
+            return ligand[0]
+
+        return ligand
+
+    
 
     def extract_graph_data(self, complex_id):
         return self.index_data[complex_id]
