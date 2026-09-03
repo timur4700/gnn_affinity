@@ -1,8 +1,6 @@
 from dataclasses import dataclass, asdict, fields, field
-from collections.abc import Callable
 
 from typing import Any, Sequence
-
 from pathlib import Path
 
 from utils import general

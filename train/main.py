@@ -10,16 +10,19 @@ from typing import Any
 from registers.models.models import MODEL_REGISTER
 
 from train.utils import save_model_run, check_device
+from configs import train
+
+from dataclasses import asdict
 
 
 def start_trainer(model_metadata: dict[str, Any],
                   config: dict[str, Any]):
 
 
-    trainer_config = config['TrainingSettings']
-    loader_config = config['LoaderSettings']
+    trainer_config = train.TrainConfig(**config['TrainingSettings'])
+    loader_config = train.LoaderConfig(**config['LoaderSettings'])
 
-    trainer_config['device'] = check_device(trainer_config['device'])
+    trainer_config.device = check_device(trainer_config.device)
 
     dataset_metadata = model_metadata['dataset_metadata']
     dataset_path = Path(dataset_metadata['dataset_path'])
@@ -38,16 +41,16 @@ def start_trainer(model_metadata: dict[str, Any],
     if not model:
         print('Model not found\nClose...')
 
-    model: Module = model().model_class()(**model_config).to(trainer_config['device'])
+    model: Module = model().model_class()(**model_config).to(trainer_config.device)
 
 
-    model_trainer = trainer.Trainer(**trainer_config)
+    model_trainer = trainer.Trainer(**asdict(trainer_config))
     model_trainer.set_model(model,
                             Path(model_metadata['model_saved_params']))
 
     model_trainer.set_dataset(dataset,
                               spliter,
-                              loader_config['batch_size'])
+                              loader_config.batch_size)
 
 
     model_trainer.start_train()

@@ -97,7 +97,7 @@ class Trainer():
             train_losses = 0
             self.model.train()
                
-            for batch in tqdm(self.loaders['train']):
+            for batch in self.loaders['train']:
                             
                 batch = batch.to(self.device)
                 self.optimizer.zero_grad()

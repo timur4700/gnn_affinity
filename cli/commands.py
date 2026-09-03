@@ -62,8 +62,7 @@ def get_dataset_list(args):
 def run_model_prep(args):
     from models import prepare_model
 
-    prepare_model(args.input,
-                  args.model)
+    prepare_model(args.input)
 
 
 def run_model_train(args):
