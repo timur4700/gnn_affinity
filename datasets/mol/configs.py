@@ -61,8 +61,8 @@ class PDBbindMolConfig(MolConfig):
 
 
     def __post_init__(self):
-        if self.prot_source not in {'pocket', 'protein'}:
-            raise ValueError(f'Unrecognized Option: {self.prot_source}')
+        schemas.option_checker(self)
+
 
 
     @classmethod

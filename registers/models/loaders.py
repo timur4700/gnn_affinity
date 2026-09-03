@@ -38,4 +38,3 @@ def egnn_interaction_loader():
                  features=features.egnn_interaction_features(),
                  default_params=settings.ModelSettings(),
                  custom_params=general.load_yaml(custom_settings))
-

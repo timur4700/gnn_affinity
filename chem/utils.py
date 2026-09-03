@@ -122,8 +122,10 @@ def load_mol(path: str | Path,
     suffix = path.suffix
 
     rdkit_loaders = {
+        '.mol': Chem.MolFromMolFile,
         '.mol2': Chem.MolFromMol2File,
-        '.pdb': Chem.MolFromPDBFile
+        '.pdb': Chem.MolFromPDBFile,
+        '.sdf': load_sdf
     }
 
     return rdkit_loaders[suffix](path, sanitize=sanitize)
@@ -134,8 +136,7 @@ def get_distance(positions_a: np.ndarray,
                  positions_b: np.ndarray) -> np.ndarray:
 
     r_ij = positions_a[:,None,:] - positions_b[None,:,:]
-
-    d_ij = np.sum(r_ij**2,axis=-1)
+    d_ij = np.sqrt(np.sum(r_ij**2,axis=-1))
 
     return d_ij
 

@@ -98,13 +98,14 @@ class GraphManager():
         self.protein_data = schemas.ProteinData(mol=self.load_protein(self.ligand_data.mol,
                                                                       **asdict(self.mol_config.protein)))
 
-
-
-
         data = self.extract_graph_data(self.complex_name)
 
+        if 'y' not in data:
+            raise KeyError('The target value was not provided')
+
         graph = self.graph_builder.prepare_graph(self.ligand_data,
-                                                 self.protein_data,
-                                                 data=data)
+                                                 self.protein_data)
+
+        graph.data = data
 
         return graph

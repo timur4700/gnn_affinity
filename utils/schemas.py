@@ -13,7 +13,6 @@ from utils import general
 
 
 
-
 def option_checker(obj):
     for field in fields(obj):
         if 'options' in field.metadata:
@@ -23,7 +22,7 @@ def option_checker(obj):
             value = getattr(obj, option_name)
 
             if value not in options:
-                raise ValueError(f'Unrecognized option {value}')
+                raise ValueError(f'Unrecognized option <{value}> in <{option_name}> option')
 
 
 
@@ -78,12 +77,6 @@ class LigandData(Data):
 class ProteinData(Data):
     pass
 
-@dataclass
-class PLAData:
-    ligand: LigandData | None=None
-    protein: ProteinData | None=None
-    interaction_edges: np.ndarray | None=None
-    target: int | float | np.ndarray | None=None
 
 
 @dataclass

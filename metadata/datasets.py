@@ -13,3 +13,4 @@ class DatasetMetadata(MetaData):
     graph: str = ''
     graph_config_path: str = ''
     mol_config_path: str = ''
+

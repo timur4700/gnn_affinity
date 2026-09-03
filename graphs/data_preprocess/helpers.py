@@ -18,6 +18,13 @@ from pathlib import Path
 
 
 
+def get_model(model_name: str):
+    model = MODEL_REGISTER.get(model_name)\
+
+    return model()
+
+
+
 
 def get_path_builder(dataset_metadata: DatasetMetadata,
                      preproc_data: PreprocessingData):

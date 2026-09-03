@@ -13,6 +13,9 @@ import pandas as pd
 
 import os
 
+
+
+
 @dataclass
 class GraphMetadata(MetaData):
     node_dim: int=0
@@ -97,6 +100,7 @@ class MpConfig:
 @dataclass
 class PreprocessingData(MetaData):
     id: str = ''
+    model: Any = None
     saving_paths: SavingPaths = None
     configs: ConfigData = None
     entries: EntriedData = None

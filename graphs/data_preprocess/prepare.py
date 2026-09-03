@@ -85,6 +85,7 @@ def make_preproc_data(dataset_metadata,
 
     preprocess_data = graph_metadata.PreprocessingData(
         id=dataset_id,
+        model=helpers.get_model(dataset_metadata.model),
         saving_paths= make_saving_paths(destination_path, dataset_id),
         configs=make_graph_mol_config(dataset_metadata),
         entries=entries,
@@ -102,7 +103,7 @@ def make_graph_manager(dataset_metadata: metadata.DatasetMetadata,
     path_builder = helpers.get_path_builder(dataset_metadata,
                                             preproc_data)
 
-    graph_builder=GeneralGraphBuilder(preproc_data.configs.graph_config, 
+    graph_builder = GeneralGraphBuilder(preproc_data.configs.graph_config, 
                                       preproc_data.configs.features)
 
     return GraphManager(
@@ -133,10 +134,14 @@ def make_postrocess_data(preprocess_data: graph_metadata.PreprocessingData) -> G
 
 
 def start_convert(tmp_data: Path,
-                  graph_dataset_dest) -> None:
+                  graph_dataset_dest: Path,
+                  model) -> None:
+    
     from graphs.data_preprocess import torch_convert
+
     torch_convert.dataset_converter(tmp_data,
-                                    graph_dataset_dest)
+                                    graph_dataset_dest,
+                                    model.graph_analyzer)
 
 
 
@@ -173,7 +178,8 @@ def preprocess_graph_dataset(dataset_metadata: metadata.DatasetMetadata,
             )
 
         start_convert(tmp_data_path,
-                      preprocess_data.saving_paths.graph_dataset)
+                      preprocess_data.saving_paths.graph_dataset,
+                      preprocess_data.model)
 
 
     collect_results(results,

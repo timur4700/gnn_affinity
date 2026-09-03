@@ -94,16 +94,3 @@ def make_config(dataset_directory: str,
     
 
     print(f'Graph Configuration can be found in {str(graph_config_dest.resolve())}')
-
-    
-
-
-
-
-
-
-
-
-    
-
-

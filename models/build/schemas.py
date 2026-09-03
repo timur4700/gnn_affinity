@@ -8,6 +8,7 @@ class Model:
     model_name: str = ''
     model_class: Any = None
     graph_builder: list[GraphBuilder] = None
+    graph_analyzer: Any = None
     features: dict = None
     default_params: Any = None
     custom_params: dict = None

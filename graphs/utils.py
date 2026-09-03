@@ -115,7 +115,7 @@ def construct_interaction_edges(ligand_positions: np.ndarray,
 
     cutoff_mask = d_ij <= cutoff
 
-    return np.array(np.nonzero(cutoff_mask))
+    return  np.array(np.nonzero(cutoff_mask))
 
 
 
@@ -222,10 +222,10 @@ def prepare_mol_data(data: schemas.LigandData | schemas.ProteinData,
 
 
 def make_graph(data: schemas.LigandData | schemas.ProteinData,
-                  undirected=True,
-                  self_loop=False,
-                  features: schemas.Features = None,
-                  cutoff: float=None) -> MolGraph:
+               undirected=True,
+               self_loop=False,
+               features: schemas.Features = None,
+               cutoff: float=None) -> MolGraph:
 
     mol_graph = MolGraph()
 
@@ -277,10 +277,6 @@ def combine_graphs(ligand_graph: MolGraph,
                                                         protein_graph.pos,
                                                         cutoff=cutoff)
 
-        if isinstance(interaction_edges, np.ndarray):
-            interaction_edges = np.array(interaction_edges, 
-                                             dtype=np.int64)
-
 
     mol_graph.edge_index = combine_edge_index(ligand_graph.edge_index,
                                     protein_graph.edge_index,
@@ -297,25 +293,3 @@ def combine_graphs(ligand_graph: MolGraph,
 
 
     return mol_graph
-
-
-
-def insert_data2graph(graph: MolGraph,
-                      data: dict[str, Any]):
-
-    """
-    The function that unserts data to torch_geometric.data.Data object
-    **Note!** The function expect, that data includes ``y`` key, ie target variable
-    
-    """
-
-    if 'y' not in data:
-        print('The target variable was not provided for the graph')
-
-    for k, v in data.items():
-
-        if k == 'y':
-            setattr(graph, k, v)
-            continue
-
-        setattr(graph, k, v)

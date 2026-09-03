@@ -7,7 +7,7 @@ from torch.nn import (Module,
                       ReLU,
                       Dropout)
 
-#from torch_geometric.utils import subgraph
+from torch_geometric.utils import subgraph
 
 from models.nn import utils as utils_general, mpnn
 from models.built_in_models.egnn_interaction import utils
