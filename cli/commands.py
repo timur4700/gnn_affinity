@@ -27,13 +27,23 @@ def run_graph_preparation(args):
     general.limit_threads()
     
     from graphs.data_preprocess import prepare
+    from schemas.general import find_metadata
+    from metadata.datasets import DatasetMetadata
 
-    dataset_meta_path = Path(args.input)
-    dataset_metadata = DatasetMetadata(**general.load_json(dataset_meta_path))
+    dataset_directory = Path(args.input)
+    dataset_metadata = find_metadata(dataset_directory,
+                                     DatasetMetadata)
 
+    n_cpu = args.n_cpu
+
+    if n_cpu <= 0:
+        raise ValueError('n_cpu argument must be greater than 0')
+
+    n_cpu = min(args.n_cpu, os.cpu_count() or 1)
 
     prepare.preprocess_graph_dataset(dataset_metadata,
-                                     Path(args.output))
+                                     Path(args.output),
+                                     n_cpu)
 
 
 

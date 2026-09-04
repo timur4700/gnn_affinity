@@ -63,6 +63,13 @@ def make_parser():
     graph_prepare.add_argument('-o', '--output',
                        required=True)
 
+
+    graph_prepare.add_argument('--n_cpu', 
+                               default=1,
+                               type=int,
+                               help="Number of CPUs to preprocess the dataset")
+    
+
     graph_prepare.set_defaults(func=commands.run_graph_preparation)
 
 

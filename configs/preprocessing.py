@@ -6,6 +6,7 @@ from schemas.general import MetaData
 from schemas.mol import Features
 
 import os
+from pathlib import Path
 
 import pandas as pd
 
@@ -14,12 +15,12 @@ import pandas as pd
 
 @dataclass
 class SavingPaths:
-    tmp_dir: str = ''
-    tmp_dataset_np: str = ''
-    graph_dataset_dir: str = ''
-    graph_dataset: str = ''
-    metadata: str = ''
-    error_log: str = ''
+    tmp_dir: Path = ''
+    tmp_dataset_np: Path = ''
+    graph_dataset_dir: Path = ''
+    graph_dataset: Path = ''
+    metadata: Path = ''
+    error_log: Path = ''
 
     @classmethod
     def make(cls, destination_path, dataset_id):
@@ -61,7 +62,7 @@ class EntriedData:
 
 @dataclass
 class MpConfig:
-    n_proc: int = 0
+    n_cpu: int = 0
     chunk_size: int = 0
 
 

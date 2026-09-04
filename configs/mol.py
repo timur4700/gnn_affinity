@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from typing import Literal
-from schemas import general
 from utils import options
 
 
@@ -13,12 +12,12 @@ class Formats:
                                                                ['mol2', 'sdf'])
 
     def __post_init__(self):
-        general.option_checker(self)
+        options.option_checker(self)
 
 
 @dataclass
 class LigandConfig:
-    sanitize: bool = general.make_option_field(False,
+    sanitize: bool = options.make_option_field(False,
                                                [True, False])
 
 @dataclass

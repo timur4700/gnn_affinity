@@ -12,10 +12,12 @@ class ComplexGraphConfig:
     @classmethod
     def load_data(cls, data: dict):
         return cls(
-            ligand=data['Graph']['Ligand'],
-            protein=data['Graph']['Protein'],
-            interaction=data['Interaction']
+            ligand=GeneralGraphMolConfig(**data['Graph']['Ligand']),
+            protein=GeneralGraphMolConfig(**data['Graph']['Protein']),
+            interaction=GeneralGraphInterConfig(**data['Interaction'])
         )
+
+
 
 
 
@@ -28,6 +30,13 @@ class GeneralGraphMolConfig:
 
     def __post_init__(self):
        options.option_checker(self)
+       self._validate()
+
+
+    def _validate(self):
+        if self.graph_type == '2d':
+            self.intra_cutoff = 0.0
+
 
 
 
@@ -35,7 +44,7 @@ class GeneralGraphMolConfig:
 class GeneralGraphInterConfig:
    add_interaction_edges:bool = options.make_option_field(True, [True, False])
    edge_type:bool = options.make_option_field(True, [True, False])
-   intra_cutoff: float = 5.0
+   inter_cutoff: float = 5.0
 
    def __post_init__(self):
        options.option_checker(self)

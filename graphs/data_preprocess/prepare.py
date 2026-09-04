@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+import shutil
+
 from utils import general
 
 
@@ -11,7 +13,7 @@ from configs import preprocessing
 
 from graphs.maker.manager import GraphManager
 from graphs.maker.builders import GeneralGraphBuilder
-#from graphs.configs.structure import GraphConfig
+
 
 from configs.graph import ComplexGraphConfig
 
@@ -60,13 +62,16 @@ def make_entries_path_data(dataset_metadata: DatasetMetadata):
 
 
 
-def calc_chunck_n_proc(entries_paths):
-    print(f'AVAILABLE CPU: {os.cpu_count()}')
-    n_proc = os.cpu_count()
+def calc_chunck_n_proc(entries_paths: list[Path], 
+                       n_cpu: int=1):
+    
     chunk_size = helpers.chunk_size_calc(entries_paths,
-                                         n_proc)
+                                         n_cpu)
+    
+    if n_cpu == 1:
+        chunk_size = 1
 
-    return {'n_proc': n_proc, 'chunk_size': chunk_size}
+    return {'n_cpu': n_cpu, 'chunk_size': chunk_size}
 
 
 
@@ -85,7 +90,8 @@ def collect_results(results,
 
 
 def make_preproc_data(dataset_metadata,
-                      destination_path):
+                      destination_path,
+                      n_cpu: int=1):
 
     dataset_id = general.make_unique_id()
     entries = make_entries_path_data(dataset_metadata)
@@ -97,7 +103,8 @@ def make_preproc_data(dataset_metadata,
         configs=make_graph_mol_config(dataset_metadata),
         entries=entries,
         mp_config=preprocessing.MpConfig(
-        **calc_chunck_n_proc(entries.paths)
+        **calc_chunck_n_proc(entries.paths,
+                             n_cpu)
             )
         )
 
@@ -155,11 +162,13 @@ def start_convert(tmp_data: Path,
 
 
 def preprocess_graph_dataset(dataset_metadata: DatasetMetadata,
-                             destination_path: Path):
+                             destination_path: Path,
+                             n_cpu: int=1):
 
 
     preprocess_data = make_preproc_data(dataset_metadata,
-                                        destination_path)
+                                        destination_path,
+                                        n_cpu=n_cpu)
 
     preprocess_data.saving_paths.make_dir()
 
@@ -169,7 +178,7 @@ def preprocess_graph_dataset(dataset_metadata: DatasetMetadata,
     graph_dataset_metadata = make_graph_dataset_meta(preprocess_data,
                                                      dataset_metadata)
 
-    print(f"N_CPU: {preprocess_data.mp_config.n_proc}")
+    print(f"N_CPU: {preprocess_data.mp_config.n_cpu}")
     print(f"CHUNK: {preprocess_data.mp_config.chunk_size}")
 
 
@@ -181,20 +190,36 @@ def preprocess_graph_dataset(dataset_metadata: DatasetMetadata,
         results = mp.mp_prepare(
             graph_manager,
             tmp_data_path,
-            preprocess_data.mp_config.n_proc,
+            preprocess_data.mp_config.n_cpu,
             preprocess_data.entries.paths,
             preprocess_data.mp_config.chunk_size
             )
 
-        start_convert(tmp_data_path,
-                      preprocess_data.saving_paths.graph_dataset,
-                      preprocess_data.model)
+        print('Tensor convertation will be running on 1 CPU')
+
+
+        try:
+
+            start_convert(tmp_data_path,
+                          preprocess_data.saving_paths.graph_dataset,
+                          preprocess_data.model)
+
+        except ValueError as e:
+            print(e)
+            shutil.rmtree(preprocess_data.saving_paths.graph_dataset_dir)
+            print(f'Directory {preprocess_data.saving_paths.graph_dataset_dir} was deleted')
+
+            return
+            
+
 
 
     collect_results(results,
                     preprocess_data,
                     graph_dataset_metadata)
 
+    
+    
     graph_dataset_metadata.save(preprocess_data.saving_paths.metadata)
     
     print(f"PDBbind Graph Dataset was successfully saved in\

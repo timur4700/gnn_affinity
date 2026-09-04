@@ -9,7 +9,6 @@ from train import utils
 from train import predictor
 
 from schemas.train import DataSetSplited
-from tqdm import tqdm
 
 import copy
 
@@ -27,7 +26,9 @@ class Trainer():
                  loss_func: Literal['mse']='mse',
                  verbose: Literal[0, 1]=1,
                  device: str='cpu',
-                 save_train_log: bool=True
+                 save_train_log: bool=True,
+                 show_val_metrics: bool=False,
+                 show_test_metrics: bool=False
                  ):
 
         self.device = device
@@ -53,6 +54,8 @@ class Trainer():
         self.verbose = verbose
 
         self.save_log = save_train_log
+        self.show_val_metrics = show_val_metrics
+        self.show_test_metrics = show_test_metrics
 
         if save_train_log:
             self.train_log = 'Train Log:\n'
@@ -143,6 +146,12 @@ class Trainer():
             if self.verbose:
                 print(msg)
 
+                if self.show_val_metrics:
+                    self.predict_val()
+
+                if self.show_test_metrics:
+                    self.predict_test()
+
             if self.save_log:
                 self.train_log += msg + '\n'
 
@@ -161,11 +170,24 @@ class Trainer():
         return  val_losses
 
 
-    def predict(self):
+
+    def predict_val(self):
+
+        y_test, y_hat = self.predictor.predict(self.model,
+                                               self.loaders['val'])
+
+        metrics = self.predictor.calc_perf_stats(y_test,
+                                                 y_hat, 'Validation')
+
+        return metrics
+
+
+    def predict_test(self,
+                model_params = None):
 
         y_test, y_hat = self.predictor.predict(self.model,
                                          self.loaders['test'],
-                                         self.best_model_val_loss_param)
+                                         model_params)
 
         metrics = self.predictor.calc_perf_stats(y_test,
                                                  y_hat)

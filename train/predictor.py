@@ -54,9 +54,9 @@ class Predictor():
         
         return y_test, y_hat
 
-    def calc_perf_stats(self, y_test, y_hat):
+    def calc_perf_stats(self, y_test, y_hat, dataset='Test'):
 
-        stats_line = 'Test Prediction Stats: '
+        stats_line = f'{dataset} Prediction Stats: '
         metrics_line = ''
         metrics_dict = dict()
 

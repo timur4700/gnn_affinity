@@ -9,7 +9,8 @@ TrainingSettings:
   loss_func: mse # Options: [mse]
   verbose: 1 # Options: [0, 1]
   device: cpu # Options: [cpu, cuda, mps] / mps for Apple GPU on M series
-  save_train_log: true #Options [true, false]
+  save_train_log: true # Options [true, false]
+  show_test_metrics: false # Options [true, false]
 
 
 LoaderSettings:

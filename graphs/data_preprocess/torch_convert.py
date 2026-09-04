@@ -65,3 +65,7 @@ def dataset_converter(source: Path,
                 if data_checker(data):
 
                     pickle.dump(data_converter(data), f)
+
+
+    if not dataset:
+        raise ValueError('Graph Preparation Failed')

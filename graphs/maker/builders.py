@@ -6,6 +6,8 @@ from pathlib import Path
 from graphs import utils
 from configs.graph import ComplexGraphConfig
 
+from dataclasses import asdict
+
 
 parent_path = Path(__file__).resolve().parent
 
@@ -46,15 +48,15 @@ class GeneralGraphBuilder(GraphBuilder):
   
     
         ligand_graph = utils.make_graph(ligand_data,
-                                        **self.graph_config.ligand,
+                                        **asdict(self.graph_config.ligand),
                                         features=self.features)
             
         protein_graph = utils.make_graph(protein_data, 
-                                         **self.graph_config.protein,
+                                         **asdict(self.graph_config.protein),
                                          features=self.features)
     
         graph = utils.combine_graphs(ligand_graph,
                                      protein_graph,
-                                     **self.graph_config.interaction)
+                                     **asdict(self.graph_config.interaction))
     
         return graph
