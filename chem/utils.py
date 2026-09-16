@@ -8,7 +8,6 @@ from typing import Literal
 
 import numpy as np
 
-
 def _adjacency_mda(u: mda.Universe,
                a_matrix: np.ndarray,
                undirected: bool=True) -> None:

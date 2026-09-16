@@ -2,6 +2,7 @@ import numpy as np
 from collections.abc import Callable
 from schemas.mol import MolGraph
 from chem import utils as chem_utils
+from chem import mol_features
 from rdkit import Chem
 
 from schemas import mol
@@ -72,8 +73,8 @@ def construct_feature_matrix(
 
     n_atoms = mol.GetNumAtoms()
 
-    ligand_features = ligand_features or chem_utils.AtomFeatureExtract().extract_func()
-    protein_features = protein_features or chem_utils.ProteinFeatureExtract().extract_func()
+    ligand_features = ligand_features or mol_features.AtomFeatureExtract().extract_func()
+    protein_features = protein_features or mol_features.ProteinFeatureExtract().extract_func()
 
     feature_dict = ligand_features if ligand else protein_features
 

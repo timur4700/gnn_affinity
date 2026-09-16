@@ -24,6 +24,8 @@ class ModuleMPNN(Module):
         self.gnn_conv_module=None
         self.node_hidden_dim = node_hidden_dim
 
+        self.relu = make_act_function('relu')()
+
         self.edge_attr = edge_attr
         self.edge_dim = edge_dim
 
@@ -42,6 +44,7 @@ class ModuleMPNN(Module):
 
         x = self.gnn_conv_module(x, edge_index, edge_attr) if self.edge_attr else self.gnn_conv_module(x, edge_index)
         x = self.norm(x, batch_idx) if isinstance(self.norm, GraphNorm) else self.norm(x)
+        x = self.relu(x)
         x = self.dropout_feature(x)
  
         if self.residual:

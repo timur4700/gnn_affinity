@@ -16,6 +16,7 @@ class TrainConfig:
   loss_func:str = options.make_option_field('mse', ['mse'])
   verbose:int = options.make_option_field(1,[0, 1])
   device: str = options.make_option_field('cpu', ['cpu', 'cuda', 'mps'])
+  show_test_metrics: bool = options.make_option_field(True, [True, False])
   save_train_log:bool = options.make_option_field(True, [True, False])
 
   def __post_init__(self):

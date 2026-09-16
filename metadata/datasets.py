@@ -4,6 +4,7 @@ from schemas.general import MetaData
 from pathlib import Path
 from utils.options import make_path_field
 
+
 @dataclass
 class DatasetMetadata(MetaData):
 
