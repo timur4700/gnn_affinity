@@ -5,7 +5,7 @@ from configs.preprocessing import PreprocessingData
 from configs.mol import MolConfig
 
 from registers.path_builders import PATHS_REGISTER
-from registers.configs.mol import MOL_CONFIG
+from registers.configs import MOL_CONFIG, GRAPH_CONFIG
 from registers.models.models import MODEL_REGISTER
 
 
@@ -30,9 +30,10 @@ def get_model(model_name: str):
 
 
 
-def get_path_builder(dataset_metadata: DatasetMetadata,
-                     preproc_data: PreprocessingData):
-    
+def get_path_builder(
+        dataset_metadata: DatasetMetadata,
+        preproc_data: PreprocessingData
+):    
     name = dataset_metadata.name
     mol_config: MolConfig = preproc_data.configs.mol_config
     
@@ -40,12 +41,15 @@ def get_path_builder(dataset_metadata: DatasetMetadata,
 
 
 
-def index_preprocess(index_data: pd.DataFrame) -> dict[str, list[Any]]:
+def index_preprocess(
+        index_data: pd.DataFrame
+) -> dict[str, list[Any]]:
 
-    return (index_data.set_index('pdb_id')[['-logKd/Ki', 'dataset']]
-            .rename(columns={'-logKd/Ki': 'y'})
-            .to_dict('index')
-            )
+    return (
+        index_data.set_index('pdb_id')[['-logKd/Ki', 'dataset']]
+        .rename(columns={'-logKd/Ki': 'y'})
+        .to_dict('index')
+    )
 
 
 
@@ -59,25 +63,29 @@ def chunk_size_calc(iterable: Sequence[Any],
     return chunk
 
 
-def load_mol_config(config_path, 
-                    dataset_name: str):
+def load_graph_config(
+        config_path: Path,
+        graph_name: str,
+):
+    raw_config = general.load_yaml(config_path) 
+    config_schema = GRAPH_CONFIG.get(graph_name)
+    return config_schema.load_data(
+        raw_config['GraphConfig']
+    )
+
+
+
+def load_mol_config(
+        config_path: Path, 
+        dataset_name: str
+):
     
     raw_config = general.load_yaml(config_path)
     config_schema = MOL_CONFIG.get(dataset_name)
 
-    return config_schema.load_data(raw_config['MolConfig'])
-
-
-
-def load_config(config_path, 
-                config_key: str, 
-                schema):
-
-    
-    
-    raw = general.load_yaml(config_path)
-    return schema.load_data(raw[config_key])
-
+    return config_schema.load_data(
+        raw_config['MolConfig']
+    )
 
 
 def load_target_data(target_data_path: Path):
@@ -88,7 +96,6 @@ def load_target_data(target_data_path: Path):
     return target_data
 
 
-
 def make_features(model_name) -> Features:
 
     if model_name is None:
@@ -96,9 +103,9 @@ def make_features(model_name) -> Features:
               'All available features will be preprocessed')
     
         features = Features(
-                            ligand_features=get_all_ligand_features(),
-                            protein_features=get_all_protein_features()
-                            )
+            ligand_features=get_all_ligand_features(),
+            protein_features=get_all_protein_features()
+        )
     
     else:
         model = MODEL_REGISTER.get(model_name)
@@ -116,9 +123,11 @@ def make_error_log(failed: list[str]):
     log_file_header = "Unprocessed PDBs:\n"
     num_errors = len(failed)
 
-    error_log = log_file_header + \
-                    '\n'.join(failed) + \
-                        f"\nTotal Errors: {num_errors}"
+    error_log = (
+        log_file_header + 
+        '\n'.join(failed) + 
+        f"\nTotal Errors: {num_errors}"
+    )
 
     return error_log
 

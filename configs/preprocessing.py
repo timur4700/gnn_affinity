@@ -13,7 +13,7 @@ import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
 from configs.mol import MolConfig
-from configs.graph import ComplexGraphConfig
+from configs.graph import GraphConfig
 
 
 
@@ -60,12 +60,12 @@ class SavingPaths(BaseModel):
 
 
 class ConfigData(BaseModel):
-    graph_config: ComplexGraphConfig | None = None
+    graph_config: GraphConfig | None = None
     mol_config: MolConfig | None = None
     features: Features | None = None   
 
 
-class EntriedData(BaseModel):
+class EntriesData(BaseModel):
     paths: list[Path] | None = None
     target: dict | None = None
 
@@ -79,6 +79,6 @@ class PreprocessingData(BaseModel):
     id: str | None = None
     model: Any | None = None
     saving_paths: SavingPaths | None = None
-    configs: ConfigData | None = None
-    entries: EntriedData | None = None
+    configs: Any | None = None
+    entries: EntriesData | None = None
     mp_config: MpConfig | None = None

@@ -37,11 +37,11 @@ def make_graph_mol_config(
         dataset_metadata: DatasetMetadata
     ) -> preprocessing.ConfigData:
 
-    graph_config = helpers.load_config(
+    graph_config = helpers.load_graph_config(
         dataset_metadata.graph_config_path,
-        'GraphConfig',
-        ComplexGraphConfig
-    ) 
+        dataset_metadata.graph_name
+    )
+
     
     mol_config = helpers.load_mol_config(
         dataset_metadata.mol_config_path,
@@ -61,7 +61,7 @@ def make_graph_mol_config(
 
 def make_entries_path_data(
         dataset_metadata: DatasetMetadata
-        ) -> preprocessing.EntriedData:
+        ) -> preprocessing.EntriesData:
 
     entries_dir = Path(
         dataset_metadata.entries_path
@@ -77,7 +77,7 @@ def make_entries_path_data(
     )
     
 
-    return preprocessing.EntriedData(
+    return preprocessing.EntriesData(
         paths=entries_paths,
         target=entries_data
     )
@@ -126,15 +126,22 @@ def make_preproc_data(
 
     dataset_id = general.make_unique_id()
     entries = make_entries_path_data(dataset_metadata)
+    configs = make_graph_mol_config(dataset_metadata)
+
+    model = helpers.get_model(
+        dataset_metadata.model_name
+    )
+
+    configs = model.graph_validator(configs)
 
     preprocess_data = preprocessing.PreprocessingData(
         id=dataset_id,
-        model=helpers.get_model(dataset_metadata.model_name),
+        model=model,
         saving_paths= make_saving_paths(
             destination_path, 
             dataset_id
         ),
-        configs=make_graph_mol_config(dataset_metadata),
+        configs=configs,
         entries=entries,
         mp_config=preprocessing.MpConfig(
         **calc_chunck_n_proc(
@@ -187,17 +194,6 @@ def make_graph_dataset_meta(
         id=preprocess_data.id,
         graph_config_metadata=graph_config_metadata,
         dataset_path=preprocess_data.saving_paths.graph_dataset,
-    )
-
-
-
-def make_postrocess_data(
-        preprocess_data: preprocessing.PreprocessingData
-    ) -> GraphDatasetMeta:
-
-    return make_graph_metadata(
-        preprocess_data.configs.features,
-        preprocess_data.configs.graph_config
     )
 
 

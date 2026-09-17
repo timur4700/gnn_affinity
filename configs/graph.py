@@ -7,22 +7,27 @@ from configs.base import config_validation_wrapp
 
 
 
+class GraphConfig(BaseModel):
+    pass
 
-class GeneralGraphMolConfig(BaseModel):
+
+
+# General Graph Config
+class GeneralGraphMolConfig(GraphConfig):
     undirected: Literal[True, False]
     self_loop: Literal[True, False]
     graph_type: Literal['2d', '3d']
     intra_cutoff: Annotated[float | int, Field(ge=0.0)]
 
 
-class GeneralGraphInterConfig(BaseModel):
+class GeneralGraphInterConfig(GraphConfig):
     add_interaction_edges: Literal[True, False]
     edge_type: Literal[True, False]
     inter_cutoff: Annotated[float | int, Field(ge=0.0)] = 5.0
 
 
 
-class ComplexGraphConfig(BaseModel):
+class ComplexGraphConfig(GraphConfig):
     ligand: GeneralGraphMolConfig
     protein: GeneralGraphMolConfig
     interaction: GeneralGraphInterConfig
