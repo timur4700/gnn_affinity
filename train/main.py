@@ -26,11 +26,11 @@ def load_train_configs(model_metadata: ModelMetaData):
 
     train_configs = general.load_yaml(
         model_metadata.trainer_config_path
-        )
+    )
 
     configs['train'] = train.TrainConfig(
         **train_configs['TrainingSettings']
-        )
+    )
 
     configs['loader'] = train.LoaderConfig(
         **train_configs['LoaderSettings']
@@ -39,10 +39,11 @@ def load_train_configs(model_metadata: ModelMetaData):
     return configs
 
 
-def start_trainer(model_directory: Path,
-                  retrain: bool=False,
-                  model_params=None):
-
+def start_trainer(
+        model_directory: Path,
+        retrain: bool=False,
+        model_params=None
+    ):
 
     model_metadata: ModelMetaData = find_metadata(model_directory,
                                                   ModelMetaData)
@@ -50,15 +51,21 @@ def start_trainer(model_directory: Path,
     train_configs = load_train_configs(model_metadata)
 
 
-    train_configs['train'].device = check_device(train_configs['train'].device)
+    train_configs['train'].device = check_device(
+        train_configs['train'].device
+    )
 
-    dataset_metadata = GraphDatasetMeta(**model_metadata.dataset_metadata)
+    dataset_metadata = GraphDatasetMeta.load_data(
+        model_metadata.dataset_metadata
+    )
+
     dataset_path = dataset_metadata.dataset_path
-
     dataset = general.unpack_pickle(dataset_path)
-
-    spliter = spliters.SPLITERS.get(dataset_metadata.name,
-                                    spliters.SPLITERS['default'])
+    
+    spliter = spliters.SPLITERS.get(
+        dataset_metadata.name,
+        spliters.SPLITERS['default']
+    )
 
     model_name = model_metadata.model_name
     model_config = general.load_yaml(model_metadata.model_config_path)['ModelSettings']

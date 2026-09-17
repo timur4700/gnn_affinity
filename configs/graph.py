@@ -1,50 +1,44 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal, Annotated, Self
 from utils import options
 
+from pydantic import BaseModel, Field
+from configs.base import config_validation_wrapp
 
-@dataclass
-class ComplexGraphConfig:
-    ligand: dict[str, Any]
-    protein: dict[str, Any]
-    interaction: dict[str, Any]
+
+
+
+class GeneralGraphMolConfig(BaseModel):
+    undirected: Literal[True, False]
+    self_loop: Literal[True, False]
+    graph_type: Literal['2d', '3d']
+    intra_cutoff: Annotated[float | int, Field(ge=0.0)]
+
+
+class GeneralGraphInterConfig(BaseModel):
+    add_interaction_edges: Literal[True, False]
+    edge_type: Literal[True, False]
+    inter_cutoff: Annotated[float | int, Field(ge=0.0)] = 5.0
+
+
+
+class ComplexGraphConfig(BaseModel):
+    ligand: GeneralGraphMolConfig
+    protein: GeneralGraphMolConfig
+    interaction: GeneralGraphInterConfig
 
     @classmethod
-    def load_data(cls, data: dict):
+    @config_validation_wrapp
+    def load_data(cls, data: dict[str, dict]) -> Self:
+
         return cls(
-            ligand=GeneralGraphMolConfig(**data['Graph']['Ligand']),
-            protein=GeneralGraphMolConfig(**data['Graph']['Protein']),
-            interaction=GeneralGraphInterConfig(**data['Interaction'])
+            ligand=GeneralGraphMolConfig.model_validate(
+                data['Graph']['Ligand']
+            ),
+            protein=GeneralGraphMolConfig.model_validate(
+                data['Graph']['Protein']
+            ),
+            interaction=GeneralGraphInterConfig.model_validate(
+                data['Interaction']
+            )
         )
-
-
-
-
-
-@dataclass
-class GeneralGraphMolConfig:
-    undirected:bool = options.make_option_field(True, [True, False])
-    self_loop:bool = options.make_option_field(False, [True, False])
-    graph_type:str = options.make_option_field('2d', ['2d', '3d'])
-    intra_cutoff:float = 5.0
-
-    def __post_init__(self):
-       options.option_checker(self)
-       self._validate()
-
-
-    def _validate(self):
-        if self.graph_type == '2d':
-            self.intra_cutoff = 0.0
-
-
-
-
-@dataclass
-class GeneralGraphInterConfig:
-   add_interaction_edges:bool = options.make_option_field(True, [True, False])
-   edge_type:bool = options.make_option_field(True, [True, False])
-   inter_cutoff: float = 5.0
-
-   def __post_init__(self):
-       options.option_checker(self)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 from collections.abc import Callable
 
 from rdkit import Chem

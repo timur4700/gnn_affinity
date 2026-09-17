@@ -15,21 +15,22 @@ import copy
 
 
 class Trainer():
-    def __init__(self,
-                 optimizer: Literal['adam', 'adam_w'],
-                 seed: int,
-                 n_epochs: int,
-                 learning_rate: float,
-                 weight_decay: float=0,
-                 early_stop: bool=False,
-                 when_early_stop: int=100,
-                 loss_func: Literal['mse']='mse',
-                 verbose: Literal[0, 1]=1,
-                 device: str='cpu',
-                 save_train_log: bool=True,
-                 show_val_metrics: bool=False,
-                 show_test_metrics: bool=False
-                 ):
+    def __init__(
+            self,
+            optimizer: Literal['adam', 'adam_w'],
+            seed: int,
+            n_epochs: int,
+            learning_rate: float,
+            weight_decay: float=0,
+            early_stop: bool=False,
+            when_early_stop: int=100,
+            loss_func: Literal['mse']='mse',
+            verbose: Literal[0, 1]=1,
+            device: str='cpu',
+            save_train_log: bool=True,
+            show_val_metrics: bool=False,
+            show_test_metrics: bool=False
+    ):
 
         self.device = device
 
@@ -67,25 +68,33 @@ class Trainer():
                   save_path: Path):
         
         self.model = model
-        self.optimizer = self.optimizer(self.model.parameters(),
-                                        self.lr,
-                                        weight_decay=self.wd)
+        self.optimizer = self.optimizer(
+            self.model.parameters(),
+            self.lr,
+            weight_decay=self.wd
+        )
 
         self.path = save_path
 
 
-    def set_dataset(self,
-                    dataset,
-                    spliter,
-                    batch_size: int=32):
+    def set_dataset(
+            self,
+            dataset,
+            spliter,
+            batch_size: int=32
+        ):
 
-        self.dataset = TrainerData(dataset,
-                                   spliter,
-                                   self.seed,
-                                   batch_size)
+        self.dataset = TrainerData(
+            dataset,
+            spliter,
+            self.seed,
+            batch_size
+        )
 
         self.dataset.make_splits()
-        self.loaders = self.dataset.prepare_loaders(self.dataset.splited_dataset)
+        self.loaders = self.dataset.prepare_loaders(
+            self.dataset.splited_dataset
+        )
 
 
     def start_train(self):
@@ -95,14 +104,11 @@ class Trainer():
         best_epoch = 0
         best_val_loss = 1e9
 
-        for i_epoch in range(self.n_epoch):
-        
-                
+        for i_epoch in range(self.n_epoch):        
             train_losses = 0
             self.model.train()
                
             for batch in self.loaders['train']:
-                            
                 batch = batch.to(self.device)
                 self.optimizer.zero_grad()
         
@@ -125,7 +131,10 @@ class Trainer():
             if mean_val_loss < best_val_loss:
                 best_val_loss = mean_val_loss 
                 best_epoch = i_epoch
-                self.best_model_val_loss_param = copy.deepcopy(self.model.state_dict())
+
+                self.best_model_val_loss_param = copy.deepcopy(
+                    self.model.state_dict()
+                )
 
                   
         
@@ -173,29 +182,34 @@ class Trainer():
 
     def predict_val(self):
 
-        y_test, y_hat = self.predictor.predict(self.model,
-                                               self.loaders['val'])
+        y_test, y_hat = self.predictor.predict(
+            self.model,
+            self.loaders['val']
+        )
 
-        metrics = self.predictor.calc_perf_stats(y_test,
-                                                 y_hat, 'Validation')
-
-        return metrics
-
-
-    def predict_test(self,
-                model_params = None):
-
-        y_test, y_hat = self.predictor.predict(self.model,
-                                         self.loaders['test'],
-                                         model_params)
-
-        metrics = self.predictor.calc_perf_stats(y_test,
-                                                 y_hat)
+        metrics = self.predictor.calc_perf_stats(
+            y_test,
+            y_hat, 
+            'Validation'
+        )
 
         return metrics
 
 
-            
+    def predict_test(
+            self,
+            model_params = None
+        ):
+
+        y_test, y_hat = self.predictor.predict(
+            self.model,
+            self.loaders['test'],
+            model_params
+        )
+
+        metrics = self.predictor.calc_perf_stats(y_test, y_hat)
+
+        return metrics
 
 
     def save_checkpoint(self, epoch: int):
@@ -209,16 +223,14 @@ class Trainer():
         torch.save(checkpoint, self.path)
 
 
-
-
-
 class TrainerData():
-    def __init__(self,
-                 dataset: list,
-                 spliter,
-                 seed: int,
-                 batch_size: int=32):
-
+    def __init__(
+            self,
+            dataset: list,
+            spliter,
+            seed: int,
+            batch_size: int=32
+    ):
 
         self.dataset = dataset
         self.spliter = spliter
@@ -227,9 +239,14 @@ class TrainerData():
         self.batch_size = batch_size
 
     def make_splits(self):
-        self.splited_dataset: DataSetSplited = self.spliter(dataset=self.dataset)
+        self.splited_dataset: DataSetSplited = self.spliter(
+            dataset=self.dataset
+    )
 
-    def prepare_loaders(self, splited_dataset: DataSetSplited):
+    def prepare_loaders(
+            self, 
+            splited_dataset: DataSetSplited
+    ) -> dict[str, DataLoader]:
 
         loaders = {
             'train': DataLoader(splited_dataset.train,

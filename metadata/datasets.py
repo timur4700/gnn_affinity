@@ -1,19 +1,19 @@
-from dataclasses import dataclass
-from schemas.general import MetaData
+from typing import Annotated
+from metadata.base import MetaData
+from pydantic import Field
 
 from pathlib import Path
-from utils.options import make_path_field
 
 
-@dataclass
+
 class DatasetMetadata(MetaData):
 
-    metadata_name: str = 'Dataset Metadata'
+    metadata_name = 'Dataset'
 
     name: str = ''
-    entries_path: Path = make_path_field('Entries Directory')
-    target_path: Path = make_path_field('Target Data File')
-    model: str = ''
-    graph: str = ''
-    graph_config_path: Path = make_path_field('Graph Configuration File')
-    mol_config_path: Path = make_path_field('Molecule Configuration File')
+    entries_path: Annotated[Path | None, Field(description='Entries Directory')] = None
+    target_path: Annotated[Path | None, Field(description='Target Data File')] = None
+    model_name: str = ''
+    graph_name: str = ''
+    graph_config_path: Annotated[Path | None, Field(description='Graph Configuration File')] = None
+    mol_config_path: Annotated[Path | None, Field(description='Molecule Configuration File')] = None

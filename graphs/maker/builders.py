@@ -18,9 +18,11 @@ class GraphBuilder(ABC):
         self.config = None
 
 
-    def prepare_graph(self,
-                      ligand_data: LigandData,
-                      protein_data: ProteinData) -> MolGraph: pass
+    def prepare_graph(
+            self,
+            ligand_data: LigandData,
+            protein_data: ProteinData
+        ) -> MolGraph: pass
 
 
 
@@ -35,28 +37,38 @@ class GeneralGraphBuilder(GraphBuilder):
     name = 'general_graph'
     config_path = parent_path.parent / 'configs' / 'general_graph.yaml'
 
-    def __init__(self, 
-                 graph_config,
-                 features: Features):
+    def __init__(
+            self, 
+            graph_config,
+            features: Features
+        ):
 
         self.graph_config: ComplexGraphConfig = graph_config
         self.features = features
     
-    def prepare_graph(self, 
-                      ligand_data: LigandData, 
-                      protein_data: ProteinData):
+    def prepare_graph(
+            self, 
+            ligand_data: LigandData, 
+            protein_data: ProteinData
+        ) -> MolGraph:
   
     
-        ligand_graph = utils.make_graph(ligand_data,
-                                        **asdict(self.graph_config.ligand),
-                                        features=self.features)
+        ligand_graph = utils.make_graph(
+            ligand_data,
+            **self.graph_config.ligand.model_dump(),
+            features=self.features
+        )
             
-        protein_graph = utils.make_graph(protein_data, 
-                                         **asdict(self.graph_config.protein),
-                                         features=self.features)
+        protein_graph = utils.make_graph(
+            protein_data, 
+            **self.graph_config.protein.model_dump(),
+            features=self.features
+        )
     
-        graph = utils.combine_graphs(ligand_graph,
-                                     protein_graph,
-                                     **asdict(self.graph_config.interaction))
+        graph = utils.combine_graphs(
+            ligand_graph,
+            protein_graph,
+            **self.graph_config.interaction.model_dump()
+        )
     
         return graph

@@ -6,6 +6,7 @@ import shutil
 from typing import Tuple
 
 from registers.configs.mol import load_config_path
+from metadata.base import find_metadata
 from metadata.datasets import DatasetMetadata
 
 
@@ -50,8 +51,8 @@ def update_metadata(metadata: DatasetMetadata,
                     mol_config_path: Path):
 
     
-    metadata.model = model_name
-    metadata.graph = graph_name
+    metadata.model_name = model_name
+    metadata.graph_name = graph_name
     metadata.graph_config_path = graph_config_path
     metadata.mol_config_path = mol_config_path
 
@@ -62,7 +63,8 @@ def make_config(dataset_directory: str,
 
     dataset_directory = Path(dataset_directory)
 
-    metadata = load_dataset_metadata(dataset_directory)
+    metadata = find_metadata(dataset_directory,
+                             DatasetMetadata)
 
     model_db = ModelDB()
     model = model_db(model_name)

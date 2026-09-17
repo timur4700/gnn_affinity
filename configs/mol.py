@@ -1,77 +1,59 @@
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, Annotated, Self
 from utils import options
+from pydantic import BaseModel, Field
+from configs.base import config_validation_wrapp
 
 
+class Formats(BaseModel):
+    ligand: Literal['sdf', 'mol2']
 
 
-
-@dataclass
-class Formats:
-    ligand: Literal['sdf', 'mol2'] = options.make_option_field('mol2',
-                                                               ['mol2', 'sdf'])
-
-    def __post_init__(self):
-        options.option_checker(self)
+class LigandConfig(BaseModel):
+    sanitize: Literal[True, False]
 
 
-@dataclass
-class LigandConfig:
-    sanitize: bool = options.make_option_field(False,
-                                               [True, False])
+class ProteinConfig(BaseModel):
+    extract_pocket: Literal[True, False]
+    extract_method: Literal['atom', 'cog', 'com']
 
-@dataclass
-class ProteinConfig:
-    extract_pocket: bool = options.make_option_field(True,
-                                                     [True, False])
+    pocket_cutoff: Annotated[float | int, Field(ge=0.0)] = 10.0
+    sanitize: Literal[True, False]
 
 
-    extract_method: Literal['atom', 'cog', 'com'] = options.make_option_field('atom',
-                                                                              ['atom', 'cog', 'com'])
-    pocket_cutoff: float=10.0
-    sanitize: bool = False
-
-    def __post_init__(self):
-        options.option_checker(self)
-
-
-
-@dataclass
-class MolConfig:
-
+class MolConfig(BaseModel):
     formats: Formats
     ligand: LigandConfig
     protein: ProteinConfig
 
     @classmethod
-    def load_data(cls,
-                  data: dict
-):
-        return cls(
-            formats=Formats(**data['Formats']),
-            ligand=LigandConfig(**data['Ligand']),
-            protein=ProteinConfig(**data['Protein'])
+    @config_validation_wrapp
+    def load_data(cls, data) -> Self:
+
+        return MolConfig(
+            formats=Formats.model_validate(
+                data['Formats']
+                ),
+            ligand=LigandConfig.model_validate(
+                data['Ligand']
+            ),
+            protein=ProteinConfig.model_validate(
+                data['Protein']
+            )            
         )
 
 
-@dataclass
 class PDBbindMolConfig(MolConfig):
-    prot_source: Literal['pocket', 'protein'] = options.make_option_field('pocket',
-                                                                          ['pocket', 'protein'])
-
-
-    def __post_init__(self):
-        options.option_checker(self)
-
-
+    prot_source: str
 
     @classmethod
-    def load_data(cls, data):
+    @config_validation_wrapp
+    def load_data(cls, data) -> Self:
         mol_base = super().load_data(data)
 
         return cls(
             formats=mol_base.formats,
             ligand=mol_base.ligand,
             protein=mol_base.protein,
-            prot_source=data['ProteinSource']
+            prot_source=data["ProteinSource"],
         )

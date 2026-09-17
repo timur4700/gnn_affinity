@@ -14,82 +14,105 @@ from models.built_in_models.egnn_interaction import utils
 
 
 class EgnnInteraction(Module):
-    def __init__(self,
-                 n_rbf=32,
-                 hidden_dim=64,
-                 output_dim=1,
-                 cutoff=10,
-                 dropout=0.1,
-                 n_gine=2,
-                 n_egnn=2,
-                 normalization='batchnorm'):
+    def __init__(
+        self,
+        n_rbf=32,
+        hidden_dim=64,
+        output_dim=1,
+        cutoff=10,
+        dropout=0.1,
+        n_gine=2,
+        n_egnn=2,
+        normalization='batchnorm'
+    ):
 
         super().__init__()
-
-
 
         self.atom_embedd = utils.AtomEmbeddingLayer(101, hidden_dim)
         self.rbf = utils_general.RBF(n_rbf, cutoff=cutoff)
         self.cutoff = cutoff
         self.bond_embedd = Embedding(3, hidden_dim)
 
+        self.gine_ligand = ModuleList(
+            [
+                mpnn.GINlayer(
+                    node_input_dim=hidden_dim,
+                    node_hidden_dim=hidden_dim,
+                    node_output_dim=hidden_dim,
+                    act_function='relu', 
+                    eps=0,
+                    train_eps=True,
+                    normaliztion=normalization,
+                    residual=True,
+                    node_feature_dropout_p=dropout
+                )
 
-        self.gine_ligand = ModuleList([mpnn.GINlayer(node_input_dim=hidden_dim,
-                                                     node_hidden_dim=hidden_dim,
-                                                     node_output_dim=hidden_dim,
-                                                     act_function='relu', 
-                                                     eps=0,
-                                                     train_eps=True,
-                                                     normaliztion=normalization,
-                                                     residual=True,
-                                                     node_feature_dropout_p=dropout)
-                                                     for _ in range(n_gine)])
+                for _ in range(n_gine)
+            ]       
+        )
 
+        self.gine_protein = ModuleList(
+            [
+                mpnn.GINlayer(
+                    node_input_dim=hidden_dim,
+                    node_hidden_dim=hidden_dim,
+                    node_output_dim=hidden_dim,
+                    act_function='relu', 
+                    eps=0,
+                    train_eps=True,
+                    normaliztion=normalization,
+                    residual=True,
+                    node_feature_dropout_p=dropout
+                ) 
 
-
-
-        self.gine_protein = ModuleList([mpnn.GINlayer(node_input_dim=hidden_dim,
-                                                     node_hidden_dim=hidden_dim,
-                                                     node_output_dim=hidden_dim,
-                                                     act_function='relu', 
-                                                     eps=0,
-                                                     train_eps=True,
-                                                     normaliztion=normalization,
-                                                     residual=True,
-                                                     node_feature_dropout_p=dropout) 
-
-                                                     for _ in range(n_gine)])
-
-
-
-
-
-        self.egnn_interaction =  ModuleList([mpnn.EGNNConvBlock(input_dim=hidden_dim,
-                                                                hidden_dim=hidden_dim,
-                                                                output_dim=hidden_dim,
-                                                                cutoff=cutoff,
-                                                                n_rbf=n_rbf,
-                                                                normalization=normalization,
-                                                                weight=True, edge_attr=False)
-
-                                                                for _ in range(n_egnn)])
+                for _ in range(n_gine)
+            ]
+        )
 
 
 
-        self.dist_embedd_ligand = utils_general.mlp(n_rbf, hidden_dim, hidden_dim)
-        self.dist_embedd_protein = utils_general.mlp(n_rbf, hidden_dim, hidden_dim)
-        self.dist_embedd_inter = utils_general.mlp(n_rbf, hidden_dim, hidden_dim)
+        self.egnn_interaction =  ModuleList(
+            [
+                mpnn.EGNNConvBlock(input_dim=hidden_dim,
+                    hidden_dim=hidden_dim,
+                    output_dim=hidden_dim,
+                    cutoff=cutoff,
+                    n_rbf=n_rbf,
+                    normalization=normalization,
+                    weight=True, edge_attr=False
+                )
 
+                for _ in range(n_egnn)
+            ]
+        )
 
-        self.affinity_head = Sequential(Linear(hidden_dim*3, hidden_dim*3),
-                                      ReLU(),
-                                      Linear(hidden_dim*3, hidden_dim*2),
-                                      ReLU(),
-                                      Linear(hidden_dim*2, hidden_dim*2),
-                                      ReLU(),
-                                      Linear(hidden_dim*2, output_dim))
+        self.dist_embedd_ligand = utils_general.mlp(
+            n_rbf, 
+            hidden_dim, 
+            hidden_dim
+        )
 
+        self.dist_embedd_protein = utils_general.mlp(
+            n_rbf, 
+            hidden_dim, 
+            hidden_dim
+        )
+        
+        self.dist_embedd_inter = utils_general.mlp(
+            n_rbf, 
+            hidden_dim, 
+            hidden_dim
+        )
 
+        self.affinity_head = Sequential(
+            Linear(hidden_dim*3, hidden_dim*3),
+            ReLU(),
+            Linear(hidden_dim*3, hidden_dim*2),
+            ReLU(),
+            Linear(hidden_dim*2, hidden_dim*2),
+            ReLU(),
+            Linear(hidden_dim*2, output_dim)
+        )
 
         self.dropout = Dropout(dropout)
         self.dropout_prob = dropout
@@ -109,8 +132,12 @@ class EgnnInteraction(Module):
         batch_idx = batch.batch
         pos = batch.pos
 
-        node_idx = torch.arange(0, x.size(0), dtype=torch.long, device=x.device)
-
+        node_idx = torch.arange(
+            0, 
+            x.size(0), 
+            dtype=torch.long, 
+            device=x.device
+        )
 
         mask_edge_nonbonded = edge_attr == 0 # / Nonbonded
         mask_edge_bonded = edge_attr == 1 # / bonded
@@ -125,18 +152,21 @@ class EgnnInteraction(Module):
         label_protein = node_idx[mask_protein]
         label_inter = edge_inter.unique()
 
-        edge_index_ligand, edge_attr_ligand = subgraph(label_ligand, 
-                                                       edge_index, 
-                                                       edge_attr, 
-                                                       relabel_nodes=True,
-                                                       num_nodes=x.size(0))
+        edge_index_ligand, edge_attr_ligand = subgraph(
+            label_ligand, 
+            edge_index, 
+            edge_attr, 
+            relabel_nodes=True,
+            num_nodes=x.size(0)
+        )
 
-        
-        edge_index_protein, edge_attr_protein = subgraph(label_protein, 
-                                                         edge_index, 
-                                                         edge_attr, 
-                                                         relabel_nodes=True,
-                                                         num_nodes=x.size(0))
+        edge_index_protein, edge_attr_protein = subgraph(
+            label_protein, 
+            edge_index, 
+            edge_attr, 
+            relabel_nodes=True,
+            num_nodes=x.size(0)
+        )
 
         x = self.atom_embedd(x)
         x_ligand = x[mask_ligand]
@@ -150,15 +180,12 @@ class EgnnInteraction(Module):
         edge_index_protein = edge_index_protein[:,edge_attr_protein == 1]
 
 
-
-
         i_l, j_l = edge_index_ligand
         dist_ligand = utils_general.distance(pos_ligand[i_l], pos_protein[j_l])**0.5
         dist_ligand = self.rbf(dist_ligand)
         dist_ligand = self.dist_embedd_ligand(dist_ligand)
 
         residual_ligand = x_ligand
-
 
         for layer in self.gine_ligand:
             x_ligand = layer(x_ligand, edge_index_ligand, dist_ligand)
@@ -176,7 +203,11 @@ class EgnnInteraction(Module):
 
 
         for layer in self.gine_protein:
-            x_protein = layer(x_protein, edge_index_protein, dist_protein)
+            x_protein = layer(
+                x_protein, 
+                edge_index_protein, 
+                dist_protein
+            )
 
         x_protein = residual_protein + x_protein
 
@@ -185,21 +216,24 @@ class EgnnInteraction(Module):
 
         x_inter = x[label_inter]
 
-        edge_inter_sub, edge_attr_sub = subgraph(label_inter, 
-                                                 edge_index=edge_index, 
-                                                 edge_attr=edge_attr, 
-                                                 relabel_nodes=True, 
-                                                 num_nodes=x.size(0))
-
+        edge_inter_sub, edge_attr_sub = subgraph(
+            label_inter, 
+            edge_index=edge_index, 
+            edge_attr=edge_attr, 
+            relabel_nodes=True, 
+            num_nodes=x.size(0)
+        )
 
         residual_interaction = x_inter
 
         for layer in self.egnn_interaction:
-            x_inter, _ = layer(x_inter, 
-                               edge_inter_sub, 
-                               pos_inter, 
-                               edge_attr_sub, 
-                               batch_idx=batch_idx[label_inter])
+            x_inter, _ = layer(
+                x_inter, 
+                edge_inter_sub, 
+                pos_inter, 
+                edge_attr_sub, 
+                batch_idx=batch_idx[label_inter]
+        )
 
         x_inter = residual_interaction + x_inter
 

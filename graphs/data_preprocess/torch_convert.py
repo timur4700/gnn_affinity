@@ -29,7 +29,11 @@ def insert_data2graph(graph: MolGraph,
     for k, v in data.items():
 
         if k == 'y':
-            setattr(graph, k, torch.tensor(v, dtype=y_dtype))
+            setattr(
+                graph, 
+                k, 
+                torch.tensor(v, dtype=y_dtype)
+            )
             continue
 
         setattr(graph, k, v)
@@ -40,32 +44,55 @@ def data_converter(mol_graph: MolGraph) -> Data:
 
     data = Data()
 
-    data.x = torch.tensor(mol_graph.x, dtype=torch.float32)
-    data.mol_id = torch.tensor(mol_graph.mol_id, dtype=torch.long)
-    data.pos = torch.tensor(mol_graph.pos, dtype=torch.float32)
-    data.edge_index = torch.tensor(mol_graph.edge_index, dtype=torch.long)
-    data.edge_type = torch.tensor(mol_graph.edge_type, dtype=torch.long)
+    data.x = torch.tensor(
+        mol_graph.x, 
+        dtype=torch.float32
+    )
 
-    insert_data2graph(data, mol_graph.data)
+    data.mol_id = torch.tensor(
+        mol_graph.mol_id, 
+        dtype=torch.long
+    )
+
+    data.pos = torch.tensor(
+        mol_graph.pos, 
+        dtype=torch.float32
+    )
+    
+    data.edge_index = torch.tensor(
+        mol_graph.edge_index, 
+        dtype=torch.long
+    )
+
+    data.edge_type = torch.tensor(
+        mol_graph.edge_type, 
+        dtype=torch.long
+    )
+
+    insert_data2graph(
+        data, 
+        mol_graph.data
+    )
 
     return data
 
 
 
-def dataset_converter(source: Path,
-                      destination: Path,
-                      data_checker: Any=None):
+def dataset_converter(
+        source: Path,
+        destination: Path,
+        data_checker: Any=None
+    ) -> None:
 
     dataset: list[MolGraph] = general.unpack_pickle(source)
 
     with open(destination, 'wb') as f:
-        for data in tqdm(dataset, desc='Converting to tensors'):
 
+        for data in tqdm(dataset, desc='Converting to tensors'):
             if data_checker is not None:
                 if data_checker(data):
 
                     pickle.dump(data_converter(data), f)
-
 
     if not dataset:
         raise ValueError('Graph Preparation Failed')

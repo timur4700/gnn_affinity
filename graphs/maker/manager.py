@@ -1,6 +1,4 @@
 from typing import Any
-
-
 from graphs.maker.builders import GraphBuilder
 
 from pathlib import Path
@@ -15,8 +13,6 @@ from schemas.mol import LigandData, ProteinData
 from dataclasses import asdict
 
 from datasets.paths.builders import PathBuilder
-
-
 
 class GraphManager():
     def __init__(self,
@@ -48,23 +44,26 @@ class GraphManager():
         self.complex_name = self.complex_dir.name
         
     def load_protein(self,
-                     ligand: Chem.Mol=None,
-                     extract_pocket: bool=True,
-                     extract_method: str='atom',
-                     pocket_cutoff: float=10.0,
-                     sanitize: bool=False) -> Chem.Mol:
+            ligand: Chem.Mol=None,
+            extract_pocket: bool=True,
+            extract_method: str='atom',
+            pocket_cutoff: float=10.0,
+            sanitize: bool=False
+        ) -> Chem.Mol:
 
-        
-        protein = Chem.MolFromPDBFile(self.mol_paths.protein_path, 
-                                      sanitize=sanitize)
+        protein = Chem.MolFromPDBFile(
+            self.mol_paths.protein_path, 
+            sanitize=sanitize
+        )
 
         if extract_pocket:
-            return protein_chem.pocket_extraction(ligand,
-                                                protein,
-                                                cutoff_distance=pocket_cutoff,
-                                                method=extract_method,
-                                                sanitize=self.sanitize)
-
+            return protein_chem.pocket_extraction(
+                ligand,
+                protein,
+                cutoff_distance=pocket_cutoff,
+                method=extract_method,
+                sanitize=self.sanitize
+            )
 
         return protein
 
@@ -81,9 +80,10 @@ class GraphManager():
         """
 
         # Loading MOL2 if ligand in .mol2 format
-        ligand = utils.load_mol(self.mol_paths.ligand_path,
-                             sanitize=self.sanitize)
-
+        ligand = utils.load_mol(
+            self.mol_paths.ligand_path,
+            sanitize=self.sanitize
+        )
 
         if self.mol_paths.ligand_path.suffix == '.sdf':
             return ligand[0]
@@ -99,16 +99,21 @@ class GraphManager():
     def init_graph_preparation(self):
 
         self.ligand_data = LigandData(mol=self.load_ligand())
-        self.protein_data = ProteinData(mol=self.load_protein(self.ligand_data.mol,
-                                                                      **asdict(self.mol_config.protein)))
+        self.protein_data = ProteinData(mol=self.load_protein(
+            self.ligand_data.mol,
+            **self.mol_config.protein.model_dump()
+            )
+        )
 
         data = self.extract_graph_data(self.complex_name)
 
         if 'y' not in data:
             raise KeyError('The target value was not provided')
 
-        graph = self.graph_builder.prepare_graph(self.ligand_data,
-                                                 self.protein_data)
+        graph = self.graph_builder.prepare_graph(
+            self.ligand_data,
+            self.protein_data
+        )
 
         graph.data = data
 

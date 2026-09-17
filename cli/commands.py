@@ -27,7 +27,7 @@ def run_graph_preparation(args):
     general.limit_threads()
     
     from graphs.data_preprocess import prepare
-    from schemas.general import find_metadata
+    from metadata.base import find_metadata
     from metadata.datasets import DatasetMetadata
 
     dataset_directory = Path(args.input)

@@ -1,31 +1,29 @@
 from dataclasses import dataclass
 from utils import options
+from pydantic import BaseModel, Field
+
+from typing import Literal, Annotated
 
 
 
-@dataclass
-class TrainConfig:
+class TrainConfig(BaseModel):
   
-  optimizer:str = options.make_option_field('adam', options=['adam', 'adam_w'])
-  seed:int = 42
-  n_epochs:int = 100
-  learning_rate:float = 0.001
-  weight_decay:float = 0.0
-  early_stop:bool = options.make_option_field(False, [True, False])
-  when_early_stop:int = 100
-  loss_func:str = options.make_option_field('mse', ['mse'])
-  verbose:int = options.make_option_field(1,[0, 1])
-  device: str = options.make_option_field('cpu', ['cpu', 'cuda', 'mps'])
-  show_test_metrics: bool = options.make_option_field(True, [True, False])
-  save_train_log:bool = options.make_option_field(True, [True, False])
-
-  def __post_init__(self):
-    options.option_checker(self)
+  optimizer: Literal['adam', 'adam_w']
+  seed: Annotated[int, Field(default=42, ge=0)]
+  n_epochs: Annotated[int, Field(default=100, ge=0)]
+  learning_rate: Annotated[float, Field(default=0.00001, ge=0.0)]
+  weight_decay: Annotated[float, Field(default=0.00001, ge=0.0)]
+  early_stop: Literal[True, False]
+  when_early_stop: Annotated[int, Field(default=100, ge=0)]
+  loss_func: Literal['mse']
+  verbose: Literal[0, 1]
+  device: Literal['cpu', 'cuda', 'mps']
+  show_test_metrics: Literal[True, False]
+  save_train_log: Literal[True, False]
 
 
-@dataclass
-class LoaderConfig:
+class LoaderConfig(BaseModel):
   
-  batch_size:int = 32
-  train_frac:float = 0.9
-  val_frac:float = 0.05
+  batch_size: Annotated[int, Field(default=32, ge=0)]
+  train_frac: Annotated[float, Field(default=0.9, ge=0.0, le=1)]
+  val_frac: Annotated[float, Field(default=0.9, ge=0.0, le=1)]
