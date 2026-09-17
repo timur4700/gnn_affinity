@@ -123,7 +123,7 @@ class EgnnInteraction(Module):
         self.n_layers = n_egnn
 
 
-    def forward(self, batch):
+    def forward(self, batch, perturb=None):
 
         x = batch.x
         mol_mask = batch.mol_id.squeeze(-1)
@@ -169,6 +169,10 @@ class EgnnInteraction(Module):
         )
 
         x = self.atom_embedd(x)
+
+        if perturb is not None:
+            x = x + perturb
+
         x_ligand = x[mask_ligand]
         x_protein = x[mask_protein]
 

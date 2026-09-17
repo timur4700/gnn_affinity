@@ -174,3 +174,46 @@ def save_model_run(model_metadata: dict,
 
 
 
+
+def FLAG(
+        model,
+        batch: Data,
+        criterion,
+        optimizer,
+        step_size: float=1e-3,
+        m: int=3
+):
+    n = batch.x.size(0)
+    h = model.hidden_dim
+
+    delta = torch.empty(
+        n, h, 
+        device=batch.x.device
+    ).uniform_(-step_size, step_size)
+
+    delta.requires_grad_()
+
+    losses = 0
+
+    for _ in range(m):
+
+        pred = model(batch, perturb=delta)
+        loss = criterion(
+            pred.squeeze(-1), 
+            batch.y
+        ) / m
+
+        loss.backward()
+        losses += loss.detach()
+
+        delta = delta.detach() + step_size * delta.grad.sign()
+        delta.requires_grad_()
+
+    torch.nn.utils.clip_grad_norm_(
+        model.parameters(), 
+        max_norm=2.0
+    )
+
+    optimizer.step()
+
+    return losses

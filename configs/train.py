@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from utils import options
 from pydantic import BaseModel, Field
 
-from typing import Literal, Annotated
+from typing import Literal, Annotated, Self
 
 
 
@@ -27,3 +27,20 @@ class LoaderConfig(BaseModel):
   batch_size: Annotated[int, Field(default=32, ge=0)]
   train_frac: Annotated[float, Field(default=0.9, ge=0.0, le=1)]
   val_frac: Annotated[float, Field(default=0.9, ge=0.0, le=1)]
+
+
+
+class TrainLoaderConfig(BaseModel):
+  train: TrainConfig | None=None
+  loader: LoaderConfig | None=None
+
+  @classmethod
+  def load_data(
+    cls, 
+    data: dict
+  ):
+
+    return cls(
+      train=data['TrainingSettings'],
+      loader=data['LoaderSettings']
+    )

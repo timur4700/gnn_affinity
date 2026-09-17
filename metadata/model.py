@@ -4,7 +4,7 @@ from metadata.base import MetaData
 from pathlib import Path
 from utils.options import make_path_field
 
-from typing import Any, Annotated
+from typing import Any, Annotated, ClassVar
 
 from pydantic import Field
 
@@ -13,7 +13,8 @@ from metadata.graphs import GraphDatasetMeta
 
 class ModelMetaData(MetaData):
 
-    metadata_name = 'Model Metadata'
+    metadata_name: str = 'Model Metadata'
+    _metadata_name: ClassVar[str] = 'Model Metadata'
 
     model_name: str | None = None
     id: str | None = None

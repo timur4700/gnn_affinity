@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from schemas.general import MetaData
 
-from typing import Literal, Any, Annotated
+from typing import Literal, ClassVar, Annotated
 from pathlib import Path
 
 from utils.options import make_path_field
@@ -14,7 +14,9 @@ from configs.graph import ComplexGraphConfig
 
 class GraphMetadata(MetaData):
 
-    metadata_name = 'Graph Configuration Metadata'
+    metadata_name: str = 'Graph Configuration Metadata'
+    _metadata_name: ClassVar[str] = 'Graph Configuration Metadata'
+    
 
     node_dim: int=0
     edge_dim: int=0
@@ -28,7 +30,8 @@ class GraphMetadata(MetaData):
 
 class GraphDatasetMeta(MetaData):
 
-    metadata_name = 'Graph Dataset Metadata'
+    metadata_name: str = 'Graph Dataset Metadata'
+    _metadata_name: ClassVar[str] = 'Graph Dataset Metadata'
 
     name: str | None=None
     id: str | None=None

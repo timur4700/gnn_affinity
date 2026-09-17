@@ -28,8 +28,6 @@ def get_model(model_name: str):
     return model()
 
 
-
-
 def get_path_builder(
         dataset_metadata: DatasetMetadata,
         preproc_data: PreprocessingData
@@ -72,7 +70,6 @@ def load_graph_config(
     return config_schema.load_data(
         raw_config['GraphConfig']
     )
-
 
 
 def load_mol_config(

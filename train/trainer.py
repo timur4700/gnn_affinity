@@ -58,6 +58,8 @@ class Trainer():
         self.show_val_metrics = show_val_metrics
         self.show_test_metrics = show_test_metrics
 
+        self.flag_optimizer = True
+
         if save_train_log:
             self.train_log = 'Train Log:\n'
 
@@ -111,15 +113,29 @@ class Trainer():
             for batch in self.loaders['train']:
                 batch = batch.to(self.device)
                 self.optimizer.zero_grad()
-        
                 y_true = batch.y
-                y_hat = self.model(batch)
-                loss = self.loss_func(y_hat.squeeze(-1), y_true)
-                loss.backward()
+
+                if self.flag_optimizer:
+                    loss = utils.FLAG(
+                        self.model, 
+                        batch, 
+                        self.loss_func,
+                        self.optimizer
+                    )
+
+                else:
+                    y_hat = self.model(batch)
+                    loss = self.loss_func(y_hat.squeeze(-1), y_true)
+                    loss.backward()
+
+                    torch.nn.utils.clip_grad_norm_(
+                        self.model.parameters(), 
+                        max_norm=2.0
+                    )
+
+                    self.optimizer.step()
                                     
                 train_losses += loss.item()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=2.0)
-                self.optimizer.step()
         
             mean_train_loss = train_losses / (len(self.loaders['train']))
         
@@ -146,7 +162,10 @@ class Trainer():
             self.train_losses.append(mean_train_loss)
             self.val_losses.append(mean_val_loss)
 
-            msg = f"Epoch {i_epoch+1:<4} | Train Loss {mean_train_loss:<6.5f} | Test Loss: {mean_val_loss:<6.5f} | Best Val Loss: {best_val_loss:<6.5f}"
+            msg = (f"Epoch {i_epoch+1:<4} | "
+                   f"Train Loss {mean_train_loss:<6.5f} | "
+                   f"Test Loss: {mean_val_loss:<6.5f} | "
+                   f"Best Val Loss: {best_val_loss:<6.5f}")
 
             if self.early_stop:
                 early_stop_msg = f'(Until early stop: {int(self.when - cur)})'

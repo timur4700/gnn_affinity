@@ -17,3 +17,12 @@ LoaderSettings:
   batch_size: 32
   train_frac: 0.9
   val_frac: 0.05
+
+FLAG:
+  include: false
+
+  Parameters:
+    m: 3
+    step_size: 0.001
+    on_hidden_dim: false
+    

@@ -34,8 +34,10 @@ def _check_files_in_metadata(metadata_class: Type[BaseModel],
             
         file_path= getattr(metadata, k)
 
-        if (not os.path.exists(file_path) and
-            isinstance(file_path, Path)):
+        if not isinstance(file_path, Path):
+            continue
+
+        if not os.path.exists(file_path):
             raise FileNotFoundError(f"{v.description} was not found")
 
         print(f"{v.description} found: {str(getattr(metadata, k))}")
@@ -43,16 +45,21 @@ def _check_files_in_metadata(metadata_class: Type[BaseModel],
 
     
 class MetaData(BaseModel):
-    metadata_name: ClassVar[str] = ''
-
+    metadata_name: str = ''
+    _metadata_name: ClassVar[str] = ''
 
     def save(self, path: Path) -> None:
         with open(path, 'w') as f:
-            f.write(
-                self.model_dump_json(
-                    indent=4,
-                    exclude_unset=True
-                )
+            data = self.model_dump(
+                exclude_unset=True,
+                mode='json'
+            )
+            
+            data['metadata_name'] = self.metadata_name
+
+            general.save_json(
+                data,
+                path
             )
 
 
@@ -68,10 +75,10 @@ class MetaData(BaseModel):
         raw_data = general.load_json(metadata_path)
         metadata = cls.model_validate(raw_data)
 
-        if metadata.metadata_name != cls.metadata_name:
+        if metadata.metadata_name != cls._metadata_name:
             return
 
-        print(f"{cls.metadata_name} was found and loaded")
+        print(f"{cls._metadata_name} was found and loaded")
 
         _check_files_in_metadata(cls, 
                                  metadata)
@@ -106,9 +113,10 @@ def find_metadata(directory_path: Path,
                   metadata: Type[MetaData]) -> MetaData:
 
     files_in_dir = os.listdir(directory_path)
-    metadata_name = metadata.metadata_name
+    metadata_name = metadata._metadata_name
 
     for file in files_in_dir:
+
         if re.search(r'metadata', file):
 
             metadata_path = directory_path / file
@@ -119,5 +127,7 @@ def find_metadata(directory_path: Path,
 
             return loaded_metadata
 
-    raise MetaDataNotFound(metadata_name, 
-                           directory_path)
+    raise MetaDataNotFound(
+        metadata_name, 
+        directory_path
+    )
