@@ -149,30 +149,48 @@ def check_device(device) -> bool:
     return device
 
 
-def save_model_run(model_metadata: dict,
-                   model_params: OrderedDict,
-                   model_config: dict,
-                   train_config: dict,
-                   metrics_test: dict,
-                   train_log: str):
+def save_model_run(
+        model_metadata: dict,
+        model_params: OrderedDict,
+        model_config: dict,
+        train_config: dict,
+        metrics_test: dict,
+        train_log: str
+):
 
-    parameters_directory = Path(model_metadata['model_saved_params'])
-
+    parameters_directory = Path(
+        model_metadata.model_saved_params
+    )
 
     run_path = parameters_directory / f'run_{get_run_id(parameters_directory)}'
     os.makedirs(run_path)
 
-    torch.save(model_params, run_path / 'model.pt')
-    general.save_yaml(model_config, run_path / 'model_config.yaml')
-    general.save_yaml(train_config, run_path / 'train_config.yaml')
-    general.save_json(metrics_test, run_path / 'metrics.json')
+    torch.save(
+        model_params, 
+        run_path / 
+        'model.pt'
+    )
+
+    general.save_yaml(
+        model_config, 
+        run_path / 
+        'model_config.yaml'
+    )
+
+    general.save_yaml(
+        train_config, 
+        run_path / 
+        'train_config.yaml'
+    )
+
+    general.save_json(
+        metrics_test, 
+        run_path / 
+        'metrics.json'
+    )
 
     with open(run_path / 'train_log.txt', 'w') as f:
         f.write(train_log)
-
-
-
-
 
 
 def FLAG(

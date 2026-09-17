@@ -11,4 +11,9 @@ MOL_CONFIG = {
 
 
 def load_config_path(dataset_name: str):
-    return (PARENT / 'datasets' / 'configs' / f'{dataset_name}.yaml').resolve()
+    return (
+        PARENT / 
+        'datasets' / 
+        'configs' / 
+        f'{dataset_name}.yaml'
+    ).resolve()

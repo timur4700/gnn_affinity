@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Any
 from pathlib import Path
 
 import torch
@@ -9,9 +9,10 @@ from train import utils
 from train import predictor
 
 from schemas.train import DataSetSplited
-
+from metadata.train import RunMetaData
 import copy
 
+from train.helpers import status_wrapper
 
 
 class Trainer():
@@ -77,6 +78,15 @@ class Trainer():
         )
 
         self.path = save_path
+
+    def set_paths(
+            self,
+            run_metadata: RunMetaData
+    ) -> None:
+
+        self.model_weights_path = run_metadata.model_weights_path
+        self.model_checkpoint_path = run_metadata.model_checkpoint_path
+        self.train_log_path = run_metadata.train_log_path
 
 
     def set_dataset(
@@ -152,8 +162,10 @@ class Trainer():
                     self.model.state_dict()
                 )
 
+                self.save_model_weights(i_epoch)
+
+            self.save_checkpoint(i_epoch)
                   
-        
             if self.early_stop:
                 cur = i_epoch - best_epoch
                 if cur > self.when:
@@ -182,6 +194,10 @@ class Trainer():
 
             if self.save_log:
                 self.train_log += msg + '\n'
+                self.save_training_log(
+                    self.train_log,
+                    self.train_log_path
+                )
 
     def test(self):
 
@@ -218,7 +234,7 @@ class Trainer():
     def predict_test(
             self,
             model_params = None
-        ):
+    ) -> dict[str, Any]:
 
         y_test, y_hat = self.predictor.predict(
             self.model,
@@ -231,15 +247,42 @@ class Trainer():
         return metrics
 
 
-    def save_checkpoint(self, epoch: int):
+    def save_model_weights(
+            self,
+            epoch: int,
+            period: int=1
+    ) -> None:
 
-        checkpoint = {
-            'epoch': epoch,
-            'model_state_dict': self.best_model_val_loss_param,
-            'optimizer_state_dict': self.optimizer.state_dict()
-        }
+        if epoch % period == 0:
+            torch.save(
+                self.best_model_val_loss_param,
+                self.model_weights_path    
+            )
+        
 
-        torch.save(checkpoint, self.path)
+    def save_checkpoint(
+            self, 
+            epoch: int,
+            period:int=10
+    ) -> None:
+        if epoch % period == 0:
+
+            checkpoint = {
+                'epoch': epoch,
+                'model_weights': self.best_model_val_loss_param,
+                'optimizer_state': self.optimizer.state_dict()
+            }
+
+            torch.save(checkpoint, self.model_checkpoint_path)
+
+    def save_training_log(
+            self,
+            log: str,
+            path: Path
+    ) -> None:
+        
+        with open(path, 'w') as f:
+            f.write(log)
 
 
 class TrainerData():

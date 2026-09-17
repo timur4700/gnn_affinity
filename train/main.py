@@ -17,6 +17,12 @@ from configs import train
 
 from metadata.base import find_metadata
 
+from metadata.train import RunMetaData
+from train import helpers
+
+
+
+
 
 def load_train_configs(model_metadata: ModelMetaData):
 
@@ -32,10 +38,32 @@ def start_trainer(
         model_directory: Path,
         retrain: bool=False,
         model_params=None
-    ):
+):
 
     model_metadata: ModelMetaData = find_metadata(model_directory,
                                                   ModelMetaData)
+
+    model_id = model_metadata.id
+    run_id, run_directory = helpers.make_run_directory(
+        model_metadata.model_saved_params
+    )
+
+    run_metadata = helpers.make_run_metadata(
+        model_metadata,
+        run_id,
+        run_directory
+    )
+
+    run_metadata_path = (
+        run_directory /
+        'metadata.json'
+    )
+
+    helpers.transfer_configs2run_directory(
+        model_metadata,
+        run_metadata
+    )
+
 
     train_configs = load_train_configs(model_metadata)
 
@@ -80,20 +108,41 @@ def start_trainer(
         model_metadata.model_saved_params
     )
 
+    model_trainer.set_paths(
+        run_metadata
+    )
+
     model_trainer.set_dataset(
         dataset,
         spliter,
         train_configs.loader.batch_size
     )
 
-    model_trainer.start_train()
+    helpers.save_and_update_status(
+        run_metadata,
+        'training',
+        run_metadata_path
+    )
+
+    wrapped_train = helpers.status_wrapper(
+        model_trainer.start_train,
+        run_metadata,
+        run_metadata_path
+    )
+
+    wrapped_train()
+
+    #model_trainer.start_train()
     metrics = model_trainer.predict_test(model_trainer.best_model_val_loss_param)
 
-    save_model_run(
-        model_metadata,
-        model_trainer.best_model_val_loss_param,
-        model_config,
-        train_configs,
-        metrics,
-        model_trainer.train_log
+    run_metadata.evaluation_metrics = metrics
+
+    helpers.save_and_update_status(
+        run_metadata,
+        'finished',
+        run_metadata_path
+    )
+
+    run_metadata.save(
+        run_metadata_path
     )
