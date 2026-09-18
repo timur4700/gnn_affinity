@@ -10,7 +10,7 @@ from metadata.base import find_metadata
 def build_model(graph_dataset_directory: Path):
 
 
-    graph_dataset_metadata: GraphDatasetMeta = find_metadata(
+    graph_dataset_metadata, _ = find_metadata(
         graph_dataset_directory,
         metadata=GraphDatasetMeta
     )

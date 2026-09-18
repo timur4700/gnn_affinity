@@ -12,7 +12,13 @@ from schemas.train import DataSetSplited
 from metadata.train import RunMetaData
 import copy
 
-from train.helpers import status_wrapper
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
+
+import os
+
+
+
+
 
 
 class Trainer():
@@ -37,6 +43,7 @@ class Trainer():
 
         self.seed = seed
         self.n_epoch = n_epochs
+        self.cur_epoch = 0
 
         self.optimizer = utils.make_optimizer(optimizer)
 
@@ -65,10 +72,10 @@ class Trainer():
             self.train_log = 'Train Log:\n'
 
 
-
     def set_model(self, 
                   model: Module,
-                  save_path: Path):
+                  mode: Literal['new', 'resume', 'fine-tune']='new',
+                  model_checkpoint: Path=None):
         
         self.model = model
         self.optimizer = self.optimizer(
@@ -77,7 +84,19 @@ class Trainer():
             weight_decay=self.wd
         )
 
-        self.path = save_path
+        self.scheduler = CosineAnnealingWarmRestarts(
+            self.optimizer, 
+            T_0 = 8,
+            T_mult = 1,
+            eta_min = 1e-5
+        )
+
+        if mode == 'resume':
+            config_resume_train(
+                self,
+                model_checkpoint
+            )
+
 
     def set_paths(
             self,
@@ -118,6 +137,8 @@ class Trainer():
 
         for i_epoch in range(self.n_epoch):        
             train_losses = 0
+            self.cur_epoch = i_epoch
+
             self.model.train()
                
             for batch in self.loaders['train']:
@@ -144,11 +165,12 @@ class Trainer():
                     )
 
                     self.optimizer.step()
+
+                self.scheduler.step()
                                     
                 train_losses += loss.item()
         
             mean_train_loss = train_losses / (len(self.loaders['train']))
-        
         
             self.model.eval()
             mean_val_loss = self.test() / len(self.loaders['val'])
@@ -325,3 +347,28 @@ class TrainerData():
         }
 
         return loaders
+
+
+def config_resume_train(
+        trainer: Trainer,
+        checkpoint: Path
+) -> None:
+
+        if not checkpoint:
+            raise ValueError(
+                'Checkpoint is not registered in Run Metadata.\n'
+                'Cannot resume training'
+            )
+
+        if not os.path.exists(checkpoint):
+            raise FileNotFoundError('Checkpointer for the model was not found')
+
+        model_checkpoint = torch.load(checkpoint)
+
+        trainer.model.load_state_dict(
+            model_checkpoint['model_weights']
+        )
+        
+        trainer.optimizer.load_state_dict(
+            model_checkpoint['optimizer_state']
+        )

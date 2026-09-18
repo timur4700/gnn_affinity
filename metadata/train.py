@@ -18,11 +18,14 @@ class RunMetaData(MetaData):
                     'finished', 
                     'interupted'] = 'not_started'
 
+    epochs: int | None = None
+
     model_config_path: Annotated[
         Path | None,
         Field(
             default=None,
-            description='Model Configuration File'
+            description='Model Configuration File',
+            json_schema_extra={'file_required': True}
         )
     ]
 
@@ -30,7 +33,8 @@ class RunMetaData(MetaData):
         Path | None,
         Field(
             default=None,
-            description='Training Configuration File'
+            description='Training Configuration File',
+            json_schema_extra={'file_required': True}
         )
     ]
 
@@ -38,7 +42,8 @@ class RunMetaData(MetaData):
         Path | None,
         Field(
             default=None,
-            description='Model Checkpointer File'
+            description='Model Checkpointer File',
+            json_schema_extra={'file_required': True}
         )
     ]
 
@@ -46,7 +51,8 @@ class RunMetaData(MetaData):
         Path | None,
         Field(
             default=None,
-            description='Model Weights File'
+            description='Model Weights File',
+            json_schema_extra={'file_required': True}
         )
     ]
 
@@ -54,7 +60,8 @@ class RunMetaData(MetaData):
         Path | None,
         Field(
             default=None,
-            description='Training Log File'
+            description='Training Log File',
+            json_schema_extra={'file_required': False}
         )
     ]
 
@@ -62,7 +69,8 @@ class RunMetaData(MetaData):
         Path | None,
         Field(
             default=None,
-            description='Evaluation Metrics File'
+            description='Evaluation Metrics File',
+            json_schema_extra={'file_required': False}
         )
     ]
     evaluation_metrics: dict[str, Any] | None = None
@@ -96,3 +104,13 @@ class RunMetaData(MetaData):
             run_directory /
             'metrics.json'
         )
+
+        self.train_log_path = (
+            run_directory /
+            'train.log'
+        )
+
+    @classmethod
+    def load_from_file(cls, metadata_path):
+
+        return super().load_from_file(metadata_path)

@@ -12,9 +12,40 @@ class DatasetMetadata(MetaData):
     _metadata_name: ClassVar[str] = 'Dataset'
 
     name: str = ''
-    entries_path: Annotated[Path | None, Field(description='Entries Directory')] = None
-    target_path: Annotated[Path | None, Field(description='Target Data File')] = None
+    entries_path: Annotated[
+        Path | None, 
+        Field(
+        default=None,
+        description='Entries Directory', 
+        json_schema_extra={'file_required': True}
+        )
+    ] = None
+    
+    target_path: Annotated[
+        Path | None, 
+        Field(
+            default=None,
+            description='Target Data File',
+            json_schema_extra={'file_required': True}
+        )
+    ] = None
+
     model_name: str = ''
     graph_name: str = ''
-    graph_config_path: Annotated[Path | None, Field(description='Graph Configuration File')] = None
-    mol_config_path: Annotated[Path | None, Field(description='Molecule Configuration File')] = None
+
+    graph_config_path: Annotated[
+        Path | None, 
+        Field(
+            default=None,
+            description='Graph Configuration File',
+            json_schema_extra={'file_required': True}
+        )
+    ] = None
+    
+    mol_config_path: Annotated[
+        Path | None, 
+        Field(
+            description='Molecule Configuration File',
+            json_schema_extra={'file_required': True}
+        )
+    ] = None

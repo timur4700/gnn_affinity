@@ -7,8 +7,13 @@ from utils import general
 
 
 
-def train_model(model_directory: str):
+def train_model(
+        model_directory: str,
+        training_type: str
+    ):
 
     model_directory = Path(model_directory)
 
-    start_trainer(Path(model_directory))
+    start_trainer(
+        model_directory,
+        training_type)

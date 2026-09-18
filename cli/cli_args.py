@@ -143,6 +143,12 @@ def make_parser():
         help='The path to directory with prepared model'
     )
 
+    model_train.add_argument(
+        '-m', '--mode',
+        default='new',
+        help='Training mode, default: <new>; Options: [new, resume]'
+    )
+
     model_train.set_defaults(
         func=commands.run_model_train
     )

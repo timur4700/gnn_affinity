@@ -31,7 +31,7 @@ def run_graph_preparation(args):
     from metadata.datasets import DatasetMetadata
 
     dataset_directory = Path(args.input)
-    dataset_metadata = find_metadata(dataset_directory,
+    dataset_metadata, _ = find_metadata(dataset_directory,
                                      DatasetMetadata)
 
     n_cpu = args.n_cpu
@@ -78,4 +78,5 @@ def run_model_prep(args):
 def run_model_train(args):
     from train import train_model
 
-    train_model(args.input)
+    train_model(args.input,
+                args.mode)

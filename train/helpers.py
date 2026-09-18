@@ -1,4 +1,5 @@
-from metadata.model import ModelMetaData
+from metadata.base import MetaDataUpdater
+from metadata.model import ModelMetaData, RunPaths
 from metadata.train import RunMetaData
 
 from train.utils import get_run_id
@@ -81,14 +82,59 @@ def save_and_update_status(
     return run_metadata
 
 
+def inspect_runs(
+        model_metadata: ModelMetaData
+) -> list[RunPaths]:
+
+    runs = []
+
+    for run in os.listdir(
+        model_metadata.model_saved_params
+    ):
+        run_path = model_metadata.model_saved_params / run
+
+        for file in os.listdir(run_path):
+            if file == 'metadata.json':
+                runs.append(
+                    RunPaths(
+                        name=run,
+                        path=run_path/file
+                    )
+                )
+
+                break
+
+    return runs
+        
+
+def add_run2metadata(
+        run_id: id,
+        run_metadata_path: Path,
+        model_metadata: ModelMetaData
+) -> ModelMetaData:
+
+    new_run = RunPaths(
+        name=f"run_{run_id}",
+        path=run_metadata_path
+    )
+
+    model_metadata.model_runs = [
+        *model_metadata.model_runs, new_run
+    ]
+
+    return model_metadata
+
+
 def status_wrapper(
         func,
-        run_metadata, 
-        run_metadata_path,
+        trainer,
+        run_metadata: RunMetaData, 
+        run_metadata_path: Path,
     ):
 
     @wraps(func)
     def wrapped(*args, **kwargs):
+        
         save_and_update_status(
             run_metadata,
             'training',
@@ -97,25 +143,36 @@ def status_wrapper(
 
         try:
             results = func(*args, **kwargs)
+            run_metadata.epochs = trainer.cur_epoch
+
             save_and_update_status(
             run_metadata,
             'finished',
             run_metadata_path
             )
+
             return results
 
+        except KeyboardInterrupt:
+            run_metadata.epochs = trainer.cur_epoch
+
+            save_and_update_status(
+                            run_metadata,
+                            'interupted',
+                            run_metadata_path
+            )
+
+            raise
+
         except Exception:
+            run_metadata.epochs = trainer.cur_epoch
+
             save_and_update_status(
                 run_metadata,
                 'interupted',
                 run_metadata_path
             )
 
-
-
+            raise
+        
     return wrapped
-            
-
-
-
-

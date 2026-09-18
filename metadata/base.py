@@ -21,27 +21,31 @@ def _is_path_annotation(annotation):
     )
 
 
-def _check_files_in_metadata(metadata_class: Type[BaseModel],
-                             metadata: BaseModel):
+def _check_files_in_metadata(
+        metadata_class: Type[BaseModel],
+        metadata: BaseModel
+):
 
     for k, v in metadata_class.model_fields.items():
-
-        if not v.description:
+        if not v.json_schema_extra:
             continue
 
         if not _is_path_annotation(v.annotation):
             continue
             
-        file_path= getattr(metadata, k)
+        file_path = getattr(metadata, k)
 
         if not isinstance(file_path, Path):
             continue
 
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"{v.description} was not found")
+            if v.json_schema_extra.get(
+            'file_required'
+            ):
+                raise FileNotFoundError(f"{v.description} was not found")
 
-        print(f"{v.description} found: {str(getattr(metadata, k))}")
-
+        else:
+            print(f"{v.description} found: {str(getattr(metadata, k))}")
 
     
 class MetaData(BaseModel):
@@ -67,10 +71,10 @@ class MetaData(BaseModel):
     def load_from_file(
         cls,
         metadata_path: Path
-    ) -> BaseModel:
+    ) -> Self:
 
         if not os.path.exists(metadata_path):
-            raise FileNotFoundError(f"{cls.metadata_name} was not found")
+            raise FileNotFoundError(f"{cls._metadata_name} was not found")
 
         raw_data = general.load_json(metadata_path)
         metadata = cls.model_validate(raw_data)
@@ -109,8 +113,10 @@ class MetaData(BaseModel):
 
     
 
-def find_metadata(directory_path: Path,
-                  metadata: Type[MetaData]) -> MetaData:
+def find_metadata(
+        directory_path: Path,
+        metadata: Type[MetaData],
+) -> tuple[MetaData, Path]:
 
     files_in_dir = os.listdir(directory_path)
     metadata_name = metadata._metadata_name
@@ -125,9 +131,35 @@ def find_metadata(directory_path: Path,
             if loaded_metadata is None:
                 continue
 
-            return loaded_metadata
+            return loaded_metadata, metadata_path
 
     raise MetaDataNotFound(
         metadata_name, 
         directory_path
     )
+
+
+
+class MetaDataUpdater():
+
+    def __init__(
+            self,
+            metadata: MetaData,
+            metadata_path: Path,
+    ):
+
+        self.metadata = metadata
+
+        self.metadata_path = metadata_path
+
+    
+    def __enter__(self):
+
+        return self.metadata
+
+
+    def __exit__(self, exc_type, exc, tb):
+
+        self.metadata.save(
+            self.metadata_path
+        )

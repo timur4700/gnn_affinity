@@ -2,15 +2,22 @@ from train import helpers
 from metadata.model import ModelMetaData
 from train.workflows import utils
 
+from metadata.train import RunMetaData
 
 
-def new_training(
+def resume_training(
         model_metadata: ModelMetaData
 ) -> ModelMetaData:
 
 
-    run_metadata, run_metadata_path = utils.prepare_run_data(
-        model_metadata
+    run_data = utils.choosing_model_run(
+        metadata=model_metadata
+    )
+
+    run_metadata_path = run_data.path
+
+    run_metadata = RunMetaData.load_from_file(
+        run_data.path
     )
 
     model_trainer, train_configs = utils.build_trainer(
@@ -34,7 +41,8 @@ def new_training(
         dataset,
         splitter,
         train_configs.loader.batch_size,
-        run_metadata.model_checkpoint_path
+        'resume',
+        run_metadata.model_checkpoint_path,
     )
 
     wrapped_train = helpers.status_wrapper(

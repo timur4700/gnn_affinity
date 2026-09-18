@@ -39,7 +39,13 @@ class GraphDatasetMeta(MetaData):
     status: Literal['writing', 'failed', 'completed']='writing'
     graph_num: int=0
     graph_config_metadata: Annotated[GraphMetadata | None, Field(default_factory=GraphMetadata)]
-    dataset_path: Annotated[Path | None, Field(description='Prepared Graph Dataset')]
+    dataset_path: Annotated[
+        Path | None, 
+        Field(
+            description='Prepared Graph Dataset',
+            json_schema_extra={'file_required': True}
+        )
+    ]
 
     @classmethod
     def load(cls, metadata_path):

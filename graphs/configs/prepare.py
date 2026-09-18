@@ -63,7 +63,7 @@ def make_config(dataset_directory: str,
 
     dataset_directory = Path(dataset_directory)
 
-    metadata = find_metadata(dataset_directory,
+    metadata, _ = find_metadata(dataset_directory,
                              DatasetMetadata)
 
     model_db = ModelDB()
