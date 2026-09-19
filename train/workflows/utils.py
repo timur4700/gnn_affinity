@@ -145,6 +145,18 @@ def build_model(
     return model
 
 
+
+def collect_train_results(
+        trainer: trainer.Trainer,
+        run_metadata: RunMetaData
+) -> RunMetaData:
+
+    metrics = trainer.predict_test(trainer.best_model_val_loss_param)
+    run_metadata.evaluation_metrics = metrics
+
+    return run_metadata    
+
+
 def runs_human_readble(
         runs: list[RunPaths]
 ):

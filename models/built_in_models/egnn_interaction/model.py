@@ -28,7 +28,7 @@ class EgnnInteraction(Module):
 
         super().__init__()
 
-        self.atom_embedd = utils.AtomEmbeddingLayer(101, hidden_dim)
+        self.atom_embedd = utils.AtomEmbeddingLayer(11, hidden_dim) # 101
         self.rbf = utils_general.RBF(n_rbf, cutoff=cutoff)
         self.cutoff = cutoff
         self.bond_embedd = Embedding(3, hidden_dim)
@@ -105,7 +105,7 @@ class EgnnInteraction(Module):
         )
 
         self.affinity_head = Sequential(
-            Linear(hidden_dim*3, hidden_dim*3),
+            Linear(hidden_dim*2, hidden_dim*3),
             ReLU(),
             Linear(hidden_dim*3, hidden_dim*2),
             ReLU(),
@@ -228,10 +228,26 @@ class EgnnInteraction(Module):
             num_nodes=x.size(0)
         )
 
+        edge_inter_sub = torch.cat(
+            [
+                edge_inter_sub,
+                edge_inter_sub.flip((0,))
+            ],
+            dim=-1
+        )
+
+        edge_attr_sub = torch.cat(
+            [
+                edge_attr_sub,
+                edge_attr_sub
+            ],
+            dim=0
+        )
+
         residual_interaction = x_inter
 
         for layer in self.egnn_interaction:
-            x_inter, _ = layer(
+            x_inter, pos_inter = layer(
                 x_inter, 
                 edge_inter_sub, 
                 pos_inter, 
@@ -239,24 +255,27 @@ class EgnnInteraction(Module):
                 batch_idx=batch_idx[label_inter]
         )
 
-        x_inter = residual_interaction + x_inter
 
+        x_inter = residual_interaction + x_inter
         x = x.index_copy(0, label_inter, x_inter)
 
-        ie, je = edge_inter
-        hi, hj = x[ie], x[je]
+        x_ligand = x[mask_ligand]
+        x_protein = x[mask_protein]
 
-        dist_inter = utils_general.distance(pos[ie], pos[je])**0.5
-        weight = utils_general.cosine_cutoff(dist_inter, self.cutoff)
-        dist_inter = self.rbf(dist_inter)
-        dist_inter = self.dist_embedd_inter(dist_inter)
+        batch_idx_ligand = batch_idx[mask_ligand]
+        batch_idx_protein = batch_idx[mask_protein]
 
-        batch_edge = batch_idx[ie]
+        x_ligand = self.pool(x_ligand, batch_idx_ligand)
+        x_protein = self.pool(x_protein, batch_idx_protein)
 
-        h_ijd = torch.cat([hi, hj, dist_inter], dim=-1) #, dist[mask_edge_inter]]
-        out = self.affinity_head(h_ijd)
-        out = out * weight
+        x = torch.cat(
+            [
+                x_ligand,
+                x_protein
+            ],
+            dim=-1
+        )
 
-        out = self.pool(out, batch_edge)
+        out = self.affinity_head(x)
 
         return out

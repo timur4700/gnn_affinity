@@ -143,7 +143,7 @@ def status_wrapper(
 
         try:
             results = func(*args, **kwargs)
-            run_metadata.epochs = trainer.cur_epoch
+            run_metadata.epochs += trainer.cur_epoch
 
             save_and_update_status(
             run_metadata,
@@ -154,7 +154,7 @@ def status_wrapper(
             return results
 
         except KeyboardInterrupt:
-            run_metadata.epochs = trainer.cur_epoch
+            run_metadata.epochs += trainer.cur_epoch
 
             save_and_update_status(
                             run_metadata,
@@ -165,7 +165,7 @@ def status_wrapper(
             raise
 
         except Exception:
-            run_metadata.epochs = trainer.cur_epoch
+            run_metadata.epochs += trainer.cur_epoch
 
             save_and_update_status(
                 run_metadata,

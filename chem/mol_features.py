@@ -9,7 +9,7 @@ from collections.abc import Callable
 class AtomFeatureExtract:
     @staticmethod
     def get_atom_type(atom: Atom) -> int:
-        return atom.GetAtomicNum()
+        return atom_encodings.ATOMS_MAPPING.get(atom.GetAtomicNum(), 10)
 
     @staticmethod
     def get_num_h_bonds(atom: Atom) -> int:

@@ -46,8 +46,10 @@ def new_training(
 
     wrapped_train()
 
-    metrics = model_trainer.predict_test(model_trainer.best_model_val_loss_param)
-    run_metadata.evaluation_metrics = metrics
+    run_metadata = utils.collect_train_results(
+        model_trainer, 
+        run_metadata
+    )
 
     run_metadata.save(
         run_metadata_path

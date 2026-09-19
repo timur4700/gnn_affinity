@@ -18,7 +18,7 @@ class RunMetaData(MetaData):
                     'finished', 
                     'interupted'] = 'not_started'
 
-    epochs: int | None = None
+    epochs: int = 0
 
     model_config_path: Annotated[
         Path | None,
