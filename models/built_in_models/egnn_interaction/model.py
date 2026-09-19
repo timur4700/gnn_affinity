@@ -97,12 +97,6 @@ class EgnnInteraction(Module):
             hidden_dim, 
             hidden_dim
         )
-        
-        self.dist_embedd_inter = utils_general.mlp(
-            n_rbf, 
-            hidden_dim, 
-            hidden_dim
-        )
 
         self.affinity_head = Sequential(
             Linear(hidden_dim*2, hidden_dim*3),
