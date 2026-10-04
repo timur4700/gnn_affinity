@@ -66,7 +66,7 @@ class Trainer():
         self.show_val_metrics = show_val_metrics
         self.show_test_metrics = show_test_metrics
 
-        self.flag_optimizer = True
+        self.flag_optimizer = False
 
         if save_train_log:
             self.train_log = 'Train Log:\n'

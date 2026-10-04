@@ -347,9 +347,6 @@ class EGNNConvBlock(Module):
                 weight=weight
             )
 
-            self.norm = utils.make_normalization(normalization)(hidden_dim)
-            self.norm_name = normalization
-
 
         def forward(
                 self, 
@@ -361,14 +358,5 @@ class EGNNConvBlock(Module):
         ):
 
             x_layer, pos = self.egnn_conv(x, edge_index, pos, edge_attr)
-
-            if self.norm_name == 'graphnorm':
-                x_layer = self.norm(x_layer, batch_idx)
-
-            elif self.norm_name == 'layernorm':
-              x_layer = self.norm(x_layer, batch_idx)
-
-            else:
-                x_layer = self.norm(x_layer)
 
             return x_layer, pos

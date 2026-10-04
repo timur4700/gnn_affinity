@@ -19,7 +19,7 @@ class EgnnInteraction(Module):
         n_rbf=32,
         hidden_dim=64,
         output_dim=1,
-        cutoff=10,
+        cutoff=5,
         dropout=0.1,
         n_gine=2,
         n_egnn=2,
@@ -45,7 +45,7 @@ class EgnnInteraction(Module):
                     normaliztion=normalization,
                     residual=True,
                     node_feature_dropout_p=dropout
-                )
+                ) 
 
                 for _ in range(n_gine)
             ]       
@@ -178,19 +178,24 @@ class EgnnInteraction(Module):
         edge_index_protein = edge_index_protein[:,edge_attr_protein == 1]
 
 
-        i_l, j_l = edge_index_ligand
-        dist_ligand = utils_general.distance(pos_ligand[i_l], pos_protein[j_l])**0.5
-        dist_ligand = self.rbf(dist_ligand)
-        dist_ligand = self.dist_embedd_ligand(dist_ligand)
+        #i_l, j_l = edge_index_ligand
+        #dist_ligand = utils_general.distance(pos_ligand[i_l], pos_protein[j_l])**0.5
+        #dist_ligand = self.rbf(dist_ligand)
+        #dist_ligand = self.dist_embedd_ligand(dist_ligand)
 
         residual_ligand = x_ligand
 
         for layer in self.gine_ligand:
-            x_ligand = layer(x_ligand, edge_index_ligand, dist_ligand)
+            x_ligand, pos_ligand = layer(
+                x_ligand, 
+                edge_index_ligand, 
+                pos_ligand, 
+                edge_attr_ligand, 
+                batch_idx=batch_idx[mask_ligand]
+        )
 
 
         x_ligand = residual_ligand + x_ligand
-
 
         i_p, j_p = edge_index_protein
         dist_protein = utils_general.distance(pos_protein[i_p], pos_protein[j_p])**0.5

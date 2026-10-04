@@ -1,6 +1,5 @@
 from cli.cli_args import make_parser
 
-
 from rdkit import RDLogger
 
 RDLogger.DisableLog("rdApp.error")

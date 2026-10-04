@@ -88,19 +88,3 @@ def trainer_config_save(model_directory: Path,
                 target_config_destination)
 
     return target_config_destination
-    
-
-    
-
-
-    
-
-
-
-    
-
-
-
-
-    
-
