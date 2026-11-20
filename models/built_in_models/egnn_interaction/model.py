@@ -186,10 +186,9 @@ class EgnnInteraction(Module):
         residual_ligand = x_ligand
 
         for layer in self.gine_ligand:
-            x_ligand, pos_ligand = layer(
+            x_ligand = layer(
                 x_ligand, 
                 edge_index_ligand, 
-                pos_ligand, 
                 edge_attr_ligand, 
                 batch_idx=batch_idx[mask_ligand]
         )

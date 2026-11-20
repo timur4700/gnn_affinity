@@ -10,7 +10,7 @@ from models.nn import utils
 class ModuleMPNN(Module):
     def __init__(self,
         node_hidden_dim: int,
-        edge_attr=True,
+        edge_attr=False,
         edge_dim=None,
         node_feature_dropout_p: float=0.1,
         edge_dropout: bool=False,

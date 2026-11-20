@@ -1,2 +1,0 @@
-[console_scripts]
-gnn-affinity = main:main

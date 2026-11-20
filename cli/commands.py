@@ -34,12 +34,12 @@ def run_graph_preparation(args):
     dataset_metadata, _ = find_metadata(dataset_directory,
                                      DatasetMetadata)
 
-    n_cpu = args.n_cpu
+    n_cpu = args.mp
 
     if n_cpu <= 0:
         raise ValueError('n_cpu argument must be greater than 0')
 
-    n_cpu = min(args.n_cpu, os.cpu_count() or 1)
+    n_cpu = min(args.mp, os.cpu_count() or 1)
 
     prepare.preprocess_graph_dataset(dataset_metadata,
                                      Path(args.output),

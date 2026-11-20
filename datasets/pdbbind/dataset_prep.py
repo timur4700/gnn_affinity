@@ -36,13 +36,17 @@ def tar_extract(directory_path: Path) -> dict[str, Path]:
     for compr_folder in os.listdir(directory_path):
 
         if compr_folder.endswith('.tar.gz'):
+            orig_comp_folder_name = compr_folder
             compr_folder = compr_folder.lower()
             for pattern, name in folder_names.items():
 
                 if re.findall(pattern, compr_folder):                
-                    source = directory_path / compr_folder
+                    source = directory_path / orig_comp_folder_name
                     destination = directory_path / name
                     os.makedirs(destination, exist_ok=True)
+
+                    print(f"{name.capitalize()} was found: {source.resolve()}")
+                    print(f"Starting extracting")
 
                     with tarfile.open(source, 'r:*') as tar:
                         tar.extractall(destination)
@@ -50,8 +54,10 @@ def tar_extract(directory_path: Path) -> dict[str, Path]:
                     print(f"The PDBBind {name} found --> extracted to {str(destination)}")
 
                     paths[name] = destination / os.listdir(destination)[0]
+    if paths:
+            return paths
 
-    return paths
+    raise FileNotFoundError(f"PDBbind .2020 datasets were not found.\nClosing...")
 
 
 def merge_folders(directory_path: Path,
@@ -77,7 +83,8 @@ def merge_folders(directory_path: Path,
             
             file_paths[pdb_entry] = pdb_dest_path
 
-
+        shutil.rmtree(folder_path)
+        
         entries_path_str = str(entries_path.resolve())
 
         print(f'All PDB entries in {name} were transfered to {entries_path_str}')

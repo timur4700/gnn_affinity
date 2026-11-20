@@ -101,7 +101,7 @@ def make_parser():
     )
 
     graph_prepare.add_argument(
-        '--n_cpu', 
+        '-mp', 
         default=1,
         type=int,
         help="Number of CPUs to preprocess the dataset"
