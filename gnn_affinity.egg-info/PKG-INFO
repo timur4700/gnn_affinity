@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: gnn_affinity
+Version: 0.1.0
+Summary: GNN Models for Protein-Ligand binding affinity prediction
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy==2.4.6
+Requires-Dist: h5py==3.16.0
+Requires-Dist: rdkit==2025.9.3
+Requires-Dist: pyyaml
+Requires-Dist: pydantic
+Dynamic: license-file
+
+# gnn_affinity

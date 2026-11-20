@@ -10,9 +10,10 @@ from models.nn import utils
 class ModuleMPNN(Module):
     def __init__(self,
         node_hidden_dim: int,
-        edge_attr=False,
+        edge_attr=True,
         edge_dim=None,
         node_feature_dropout_p: float=0.1,
+        edge_dropout: bool=False,
         edge_dropout_p: float=0.0,
         normaliztion: str='batchnorm',
         residual=True,
@@ -31,6 +32,8 @@ class ModuleMPNN(Module):
 
         self.norm = make_normalization(normaliztion)(self.node_hidden_dim)
         self.dropout_feature = Dropout(node_feature_dropout_p)
+
+        self.make_edge_dropout = edge_dropout
         self.dropout_edge = DropoutEdge(
             edge_dropout_p, 
             undirected=undirected
@@ -47,17 +50,17 @@ class ModuleMPNN(Module):
             batch_idx=None
     ):
 
-        residual = x 
+        residual = x
 
-        edge_index, edge_attr_mask = self.dropout_edge(edge_index)
-        edge_attr = edge_attr[edge_attr_mask] if self.edge_attr else None
+        if self.make_edge_dropout:
+            edge_index, edge_attr_mask = self.dropout_edge(edge_index)
+            edge_attr = edge_attr[edge_attr_mask] if self.edge_attr else None
 
         if self.edge_attr:
             x = self.gnn_conv_module(x, edge_index, edge_attr)
 
         else:
             x = self.gnn_conv_module(x, edge_index)
-
 
         if isinstance(self.norm, GraphNorm):
             x = self.norm(x, batch_idx)

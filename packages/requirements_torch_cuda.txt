@@ -1,6 +1,4 @@
---extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu132
 
-torch==2.2.2+cu118
-torchvision==0.17.2+cu118
-torchaudio==2.2.2+cu118
-
+torch==2.12.1+cu132
+torchvision==0.27.1+cu132
