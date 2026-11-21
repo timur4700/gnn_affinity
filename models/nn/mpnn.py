@@ -1,10 +1,13 @@
 import torch
-from torch.nn import Module, Linear, Sequential, Dropout, SiLU  
+from torch.nn import Module, ModuleList, Linear, Sequential, Dropout, SiLU  
 from models.nn.utils import make_normalization,make_act_function, DropoutEdge
 from torch_geometric.nn import GraphNorm, GCNConv, GINConv, GINEConv, GATConv, GATv2Conv
 
 from models.nn import utils
 
+from models.nn.mpnn_settings import MPNN_DEFAULT
+
+from typing import Literal
 
 
 class ModuleMPNN(Module):
@@ -110,7 +113,6 @@ class GINlayer(ModuleMPNN):
             self, 
             node_input_dim: int,
             node_hidden_dim: int,
-            node_output_dim: int,
             act_function='relu',
             eps: int|float=0,
             train_eps=True,
@@ -122,7 +124,7 @@ class GINlayer(ModuleMPNN):
         self.fc_module = Sequential(
             Linear(node_input_dim, node_input_dim), 
             make_act_function(act_function)(),
-            Linear(node_hidden_dim, node_output_dim))
+            Linear(node_hidden_dim, node_hidden_dim))
 
         if self.edge_attr:
 
@@ -198,7 +200,6 @@ class EGNNConv(Module):
                 edge_attr=False, 
                 cosine_cutoff=True, 
                 velocity=False, 
-                weight=False
         ):
               
             super().__init__()
@@ -234,7 +235,6 @@ class EGNNConv(Module):
             self.cutoff = cutoff
             self.cosine_cutoff = cosine_cutoff
             self.velocity = velocity
-            self.weight = weight
 
             self.rbf = utils.RBF(n_rbf, cutoff=cutoff)
             self.dist_embedd = utils.mlp(n_rbf, hidden_dim, hidden_dim)
@@ -326,28 +326,26 @@ class EGNNConvBlock(Module):
 
         def __init__(
             self, 
-            n_rbf, 
-            input_dim, 
-            hidden_dim, 
-            output_dim, 
-            normalization='batchnorm', 
-            cutoff=5, 
+            node_input_dim: int,
+            node_hidden_dim: int,
+            n_rbf: float, 
+            cutoff=5,
+            cosine_cutoff: bool=True,
             edge_attr=False, 
             velocity=False, 
-            weight=False
         ):
     
             super().__init__()
 
             self.egnn_conv = EGNNConv(
-                input_dim, 
-                hidden_dim, 
-                output_dim, 
+                node_input_dim, 
+                node_hidden_dim, 
+                node_hidden_dim, 
                 cutoff=cutoff, 
                 edge_attr=edge_attr, 
                 n_rbf=n_rbf, 
                 velocity=velocity, 
-                weight=weight
+                cosine_cutoff=cosine_cutoff
             )
 
 
@@ -363,3 +361,79 @@ class EGNNConvBlock(Module):
             x_layer, pos = self.egnn_conv(x, edge_index, pos, edge_attr)
 
             return x_layer, pos
+
+
+
+
+class MPNNModule(Module):
+    def __init__(
+            self,
+            mpnn_type: Literal['gin', 'gcn', 'gat', 'egnn'],
+            node_input_dim: int,
+            node_hidden_dim: int,
+            n_layers: int,
+            n_rbf: int,
+            cutoff: float      
+    ):
+
+        super().__init__()
+
+        self.mpnns =  {
+            'gin': GINlayer,
+            'gat': GATLayer,
+            'gcn': GCNLayer,
+            'egnn': EGNNConvBlock
+        }
+
+        mpnn_config: dict = MPNN_DEFAULT.get(mpnn_type, None)
+
+        if mpnn_config is None:
+            raise ValueError("Wrong MPNN type")
+
+        if mpnn_type == 'egnn':
+            mpnn_config['n_rbf'] = n_rbf
+            mpnn_config['cutoff'] = cutoff
+
+        self.mpnn = ModuleList(
+            [
+                self.mpnns[mpnn_type](
+                    node_input_dim=node_input_dim,
+                    node_hidden_dim=node_hidden_dim,
+                    **mpnn_config
+                )
+
+                for _ in range(n_layers)
+            ]
+        )
+
+        self.mpnn_type = mpnn_type
+
+    def forward(
+            self,
+            x,
+            edge_index,
+            edge_attr=None,
+            batch_idx=None,
+            pos=None
+    ):
+
+        for layer in self.mpnn:
+            if self.mpnn_type != 'egnn':
+                x = layer(
+                    x,
+                    edge_index,
+                    edge_attr,
+                    batch_idx,
+                )
+
+            else:
+                x, pos = layer(
+                    x,
+                    edge_index,
+                    pos,
+                    edge_attr,
+                    batch_idx,
+ 
+                )
+
+        return x

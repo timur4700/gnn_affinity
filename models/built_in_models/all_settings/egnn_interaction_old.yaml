@@ -1,0 +1,9 @@
+ModelSettings:
+  n_rbf: 32
+  hidden_dim: 64
+  output_dim: 1
+  cutoff: 5.0
+  dropout: 0.1
+  n_gine: 2
+  n_egnn: 2
+  normalization: batchnorm

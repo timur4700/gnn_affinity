@@ -2,12 +2,15 @@ from typing import Literal
 
 
 import torch
-from torch.nn import (Linear,
-                      Sequential,
-                      ReLU, 
-                      SiLU,
-                      Sigmoid,
-                      Tanh)
+from torch.nn import (
+    Linear,
+    LeakyReLU,
+    Sequential,
+    ReLU, 
+    SiLU,
+    Sigmoid,
+    Tanh
+)
 
 
 from torch_geometric.nn import (BatchNorm,
@@ -30,6 +33,7 @@ from torch.nn import Module
 def make_act_function(function_name: Literal['relu', 'silu', 'sigmoid', 'tanh']):
 
     act_functions = {'relu': ReLU,
+                     'leaky_relu': LeakyReLU,
                      'silu': SiLU,
                      'sigmoid': Sigmoid,
                      'tanh': Tanh}

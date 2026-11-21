@@ -20,7 +20,6 @@ def graph_config_validator(
             (
                 'egnn_interaction model has to include explicit interation edges\n'
                 'change add_interaction_edges on -> true'
-
             )
         )
 

@@ -7,7 +7,6 @@ class AtomEmbeddingLayer(Module):
     def __init__(self, n_atoms, hidden_dim):
         super().__init__()
 
-
         n_arom_class = 2
         n_hydrogens = 5
         self.atom_embedd = Embedding(n_atoms, int(hidden_dim/2))
