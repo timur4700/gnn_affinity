@@ -8,12 +8,33 @@ A Python framework for building molecular graph neural network (GNN) models to p
 
 The **GNN Affinity** project requires **Python 3.11** and uses a Conda-based environment for dependency management.
 
-Before proceeding with the installation, ensure that either [Anaconda](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) is installed on your machine. These distributions provide the Conda package and environment manager, which is used to create and manage the project's environment.
+### 1.1. Software Requirements
+
+Before proceeding with the installation, ensure that either [Anaconda](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) is installed on your machine.
+
+These distributions provide the Conda package and environment manager, which is used to create and manage the project's environment.
 
 Refer to the official [Anaconda Installation Guide](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda Installation Guide](https://docs.conda.io/projects/miniconda/en/latest/) for installation instructions.
 
-> **Note:** You do not need to install Python 3.11 separately. The installation script automatically creates a Conda environment with the required Python version.
+> **Note:** Python 3.11 does not need to be installed separately. The installation script automatically creates a Conda environment with the required Python version.
 
+### 1.2. Operating System Compatibility
+
+The project has currently been tested on the following operating systems:
+
+- **macOS 15.7.3**
+- **Ubuntu 26.04**
+
+Other operating systems and versions have not yet been formally tested.
+
+### 1.3. Hardware Requirements
+
+Hardware requirements depend on the selected PyTorch installation:
+
+- **CPU:** Supported for model training and inference.
+- **NVIDIA GPU:** CUDA-based acceleration is supported for compatible NVIDIA hardware and drivers.
+
+GPU acceleration is recommended for computationally intensive model training and larger datasets.
 
 ## 2. Project Installation
 
@@ -313,4 +334,59 @@ The `inter_cutoff` parameter defines the maximum distance between ligand and pro
 > **Note:** Intramolecular connectivity (`intra_cutoff`) is currently applicable only to 3D graphs. It is not implemented for 2D graph representations.
 
 
+## 4. Building the Graph Dataset
 
+Once the molecular preprocessing and graph configuration files have been generated and configured, you can proceed with molecular graph construction.
+
+To build the graph dataset, run the following command:
+
+```bash
+gnn_affinity graph prepare \
+    -i path/to/downloaded/data/ \
+    -o path/to/destination/directory/
+```
+
+Where:
+
+- `-i` specifies the input directory containing the prepared dataset and configuration files.
+- `-o` specifies the output directory where the generated graph dataset will be saved.
+
+The output directory can be selected freely. However, **using an empty directory is recommended** to keep the generated dataset separate from existing files and avoid potential conflicts.
+
+### 4.1. Multiprocessing
+
+By default, graph dataset preparation runs using a single CPU process.
+
+The pipeline supports multiprocessing, allowing graph construction to be distributed across multiple CPU processes to improve preparation speed.
+
+To enable multiprocessing, specify the `-mp` flag followed by the desired number of CPU processes:
+
+```bash
+gnn_affinity graph prepare \
+    -i path/to/downloaded/data/ \
+    -o path/to/destination/directory/ \
+    -mp 8
+```
+
+In this example, graph construction is performed using **8 CPU processes**.
+
+The number of processes can be adjusted according to the available CPU resources of your machine. Avoid assigning more processes than your system can efficiently handle.
+
+### 4.2. Output Files
+
+Upon successful completion of the graph preparation process, the output directory will contain the following files. Each file is assigned a unique identifier (`[id]`) to distinguish individual dataset preparation runs.
+
+| File | Description |
+|---|---|
+| `error_[id].log` | Log file containing the PDB IDs of structures that failed during preprocessing or graph construction. |
+| `pdbbind_graph_dataset_[id].pkl` | Serialized graph dataset containing PyTorch Geometric `Data` objects representing the prepared protein–ligand complexes. |
+| `metadata_[id].json` | JSON file containing metadata associated with the generated graph dataset. |
+
+**Output directory structure:**
+
+```text
+output_directory/
+├── error_[id].log
+├── pdbbind_graph_dataset_[id].pkl
+└── metadata_[id].json
+```
