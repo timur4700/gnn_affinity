@@ -55,4 +55,11 @@ def new_training(
         run_metadata_path
     )
 
+    utils.save_predictions(
+        model_trainer,
+        run_metadata
+    )
+
+    utils.make_performance_plot(run_metadata)
+
     return model_metadata

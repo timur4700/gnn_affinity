@@ -34,7 +34,7 @@ plt.rcParams.update({
     "lines.linewidth": 1.2,
     "axes.labelsize": 8,
     "axes.titlesize": 8,
-    'axes.spines.right': False,
-    'axes.spines.top': False
+    'axes.spines.right': True,
+    'axes.spines.top': True
     
 })

@@ -56,6 +56,18 @@ class RunMetaData(MetaData):
         )
     ]
 
+
+    predictions_path: Annotated[
+        Path | None,
+        Field(
+            default=None,
+            description='Model Predictions on Test Dataset',
+            json_schema_extra={'file_required': True}
+        )
+    ]
+
+
+
     train_log_path: Annotated[
         Path | None,
         Field(
@@ -73,6 +85,16 @@ class RunMetaData(MetaData):
             json_schema_extra={'file_required': False}
         )
     ]
+
+    performance_plot_path: Annotated[
+        Path | None,
+        Field(
+            default=None,
+            description='Model Performance Plot',
+            json_schema_extra={'file_required': False}
+        )
+    ]
+
     evaluation_metrics: dict[str, Any] | None = None
 
     def make_file_paths(
@@ -100,9 +122,19 @@ class RunMetaData(MetaData):
             'train_config.yaml'
         )
 
+        self.predictions_path = (
+            run_directory /
+            'predictions.csv'
+        )
+
         self.evaluation_metrics_path = (
             run_directory /
             'metrics.json'
+        )
+
+        self.performance_plot_path = (
+            run_directory /
+            'performance_plot.png'
         )
 
         self.train_log_path = (

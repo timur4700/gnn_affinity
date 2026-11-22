@@ -14,7 +14,7 @@ class ModuleMPNN(Module):
     def __init__(self,
         node_hidden_dim: int,
         edge_attr=False,
-        edge_dim=None,
+        edge_dim=64,
         node_feature_dropout_p: float=0.1,
         edge_dropout: bool=False,
         edge_dropout_p: float=0.0,
@@ -342,7 +342,7 @@ class EGNNConvBlock(Module):
                 node_hidden_dim, 
                 node_hidden_dim, 
                 cutoff=cutoff, 
-                edge_attr=edge_attr, 
+                #edge_attr=edge_attr, 
                 n_rbf=n_rbf, 
                 velocity=velocity, 
                 cosine_cutoff=cosine_cutoff
@@ -373,7 +373,8 @@ class MPNNModule(Module):
             node_hidden_dim: int,
             n_layers: int,
             n_rbf: int,
-            cutoff: float      
+            cutoff: float,
+            **kwargs
     ):
 
         super().__init__()
@@ -399,7 +400,8 @@ class MPNNModule(Module):
                 self.mpnns[mpnn_type](
                     node_input_dim=node_input_dim,
                     node_hidden_dim=node_hidden_dim,
-                    **mpnn_config
+                    **mpnn_config,
+                    **kwargs
                 )
 
                 for _ in range(n_layers)

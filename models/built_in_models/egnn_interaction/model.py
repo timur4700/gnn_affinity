@@ -27,7 +27,8 @@ class ComponentModule(Module):
             hidden_dim: int,
             n_layers: int,
             n_rbf: int,
-            cutoff: float
+            cutoff: float,
+            **kwargs
     ):
         
         super().__init__()
@@ -40,7 +41,8 @@ class ComponentModule(Module):
             node_hidden_dim=hidden_dim,
             n_layers=n_layers,
             n_rbf=n_rbf,
-            cutoff=cutoff
+            cutoff=cutoff,
+            **kwargs
         )
 
         if mpnn_type != 'egnn':
@@ -60,9 +62,10 @@ class MolModule(ComponentModule):
             hidden_dim, 
             n_layers, 
             n_rbf, 
-            cutoff
+            cutoff,
+            **kwargs
     ):
-        super().__init__(mpnn_type, input_dim, hidden_dim, n_layers, n_rbf, cutoff)
+        super().__init__(mpnn_type, input_dim, hidden_dim, n_layers, n_rbf, cutoff, **kwargs)
 
     def forward(
             self,
@@ -76,7 +79,6 @@ class MolModule(ComponentModule):
 
         x_mol = x[mol_label]
         pos_mol = pos[mol_label]
-
 
         edge_index_mol, _ = subgraph(
                     mol_label, 
@@ -115,9 +117,10 @@ class InterModule(ComponentModule):
             n_layers, 
             n_rbf, 
             cutoff,
-            direction: Literal['lig<prot', 'lig>prot', 'lig<>prot']
+            #direction: Literal['lig<prot', 'lig>prot', 'lig<>prot'],
+            **kwargs
     ):
-        super().__init__(mpnn_type, input_dim, hidden_dim, n_layers, n_rbf, cutoff)
+        super().__init__(mpnn_type, input_dim, hidden_dim, n_layers, n_rbf, cutoff, **kwargs)
 
     def forward(
             self,
@@ -163,6 +166,7 @@ class InteractionModel(Module):
         protein_cutoff: float=3.0,
         interaction_cutoff: float=5.0,
         sum_over_interaction: bool=True,
+        **kwargs
     ):
 
         super().__init__()
@@ -175,7 +179,8 @@ class InteractionModel(Module):
             hidden_dim=hidden_dim,
             n_layers=ligand_mpnn_n_layers,
             n_rbf=n_rbf,
-            cutoff=ligand_cutoff
+            cutoff=ligand_cutoff,
+            **kwargs
         )
 
         self.protein_module = MolModule(
@@ -184,7 +189,8 @@ class InteractionModel(Module):
             hidden_dim=hidden_dim,
             n_layers=protein_mpnn_n_layers,
             n_rbf=n_rbf,
-            cutoff=protein_cutoff
+            cutoff=protein_cutoff,
+            **kwargs
         )       
 
         self.interaction_module = InterModule(
@@ -193,7 +199,8 @@ class InteractionModel(Module):
             hidden_dim=hidden_dim,
             n_layers=interaction_mpnn_n_layers,
             n_rbf=n_rbf,
-            cutoff=interaction_cutoff
+            cutoff=interaction_cutoff,
+            **kwargs
         )
 
 

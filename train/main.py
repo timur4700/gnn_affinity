@@ -11,7 +11,7 @@ from train.workflows import TRAINING_MODES
 
 def start_trainer(
         model_directory: Path,
-        training_type: Literal['new', 'resume']='resume'
+        training_type: Literal['new', 'resume']='new'
 ):
 
     model_metadata, model_metadata_path = find_metadata(model_directory,

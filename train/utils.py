@@ -2,6 +2,8 @@ import torch
 from torch.nn import MSELoss
 from torch.optim import Adam, AdamW
 
+import pandas as pd
+
 from scipy.stats import pearsonr, spearmanr
 import numpy as np
 
@@ -235,5 +237,3 @@ def FLAG(
     optimizer.step()
 
     return losses
-
-

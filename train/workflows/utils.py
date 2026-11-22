@@ -16,6 +16,9 @@ from registers.models.models import MODEL_REGISTER
 
 from torch.nn import Module
 
+import pandas as pd
+
+from plots.regression import plot_predictions
 
 
 def load_train_configs(trainer_config_path: Path):
@@ -179,3 +182,42 @@ def choosing_model_run(
     )
 
     return metadata.model_runs[choice]
+
+
+
+def save_predictions(
+        model_trainer: trainer.Trainer,
+        run_metadata: RunMetaData
+) -> None:
+
+    y_true, y_hat = model_trainer.predictor.predict(
+        model_trainer.model,
+        model_trainer.loaders['test'],
+        model_trainer.best_model_val_loss_param
+    )
+
+    predictions_df = pd.DataFrame(columns=['y_true', 'y_hat'])
+    predictions_df['y_true'] = y_true
+    predictions_df['y_hat'] = y_hat
+
+    predictions_df.to_csv(run_metadata.predictions_path)
+
+
+def make_performance_plot(
+        run_metadata: RunMetaData,
+) -> None:
+
+    predictions = pd.read_csv(run_metadata.predictions_path)
+    run_id = run_metadata.run_id
+
+    plot_save_path = run_metadata.performance_plot_path
+
+    title = f"Performance of GNN-based regression model [Run: {run_id}]"
+
+    plot_predictions(
+        predictions['y_pred'],
+        predictions['y_true'],
+        title,
+        plot_save_path,
+        30
+    )
