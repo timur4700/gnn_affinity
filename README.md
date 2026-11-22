@@ -6,9 +6,14 @@ A Python framework for building molecular graph neural network (GNN) models to p
 
 ## 1. Prerequisites
 
-The **GNN Affinity** project uses a Conda-based environment for dependency management. Before proceeding with the installation, ensure that either [Anaconda](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) is installed on your machine.
+The **GNN Affinity** project requires **Python 3.11** and uses a Conda-based environment for dependency management.
 
-Refer to the official [Anaconda Installation Guide](https://www.anaconda.com/docs/getting-started/installation) for installation instructions.
+Before proceeding with the installation, ensure that either [Anaconda](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) is installed on your machine. These distributions provide the Conda package and environment manager, which is used to create and manage the project's environment.
+
+Refer to the official [Anaconda Installation Guide](https://www.anaconda.com/docs/getting-started/installation) or [Miniconda Installation Guide](https://docs.conda.io/projects/miniconda/en/latest/) for installation instructions.
+
+> **Note:** You do not need to install Python 3.11 separately. The installation script automatically creates a Conda environment with the required Python version.
+
 
 ## 2. Project Installation
 
