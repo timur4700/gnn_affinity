@@ -159,7 +159,7 @@ def plot_residuals(
 
     ax.axhline(0, color=NATURE_COLORS['grey_1'], linestyle='--', linewidth=1)
 
-    x = np.linspace(0, max(data['y_hat']))
+    x = np.linspace(0, y_hat)
 
     ax.fill_between(
         x,
