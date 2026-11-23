@@ -11,6 +11,13 @@ from typing import Literal
 
 
 class ModuleMPNN(Module):
+
+    """Base module for message-passing neural network layers.
+
+    Provides shared functionality for graph convolution layers, including
+    normalization, activation, feature dropout, edge dropout, and residual
+    connections.
+    """
     def __init__(self,
         node_hidden_dim: int,
         edge_attr=False,
@@ -22,6 +29,21 @@ class ModuleMPNN(Module):
         residual=True,
         undirected=True
     ):
+
+        """Initialize the message-passing module.
+
+        Args:
+            node_hidden_dim: Dimensionality of node hidden representations.
+            edge_attr: Whether edge attributes are used by the convolution.
+            edge_dim: Dimensionality of edge attributes.
+            node_feature_dropout_p: Dropout probability applied to node features.
+            edge_dropout: Whether to apply edge dropout during training.
+            edge_dropout_p: Probability of dropping graph edges.
+            normaliztion: Normalization method applied after convolution.
+            residual: Whether to add the input features to the output.
+            undirected: Whether edge dropout preserves undirected connectivity.
+        """
+
         super().__init__()
 
 
@@ -82,6 +104,13 @@ class ModuleMPNN(Module):
 
 
 class GCNLayer(ModuleMPNN):
+
+    """**[Graph Convolutional Network (GCN)](https://arxiv.org/abs/1609.02907)** layer.
+
+    Implements graph convolution using the GCN operator, followed by
+    normalization, activation, and optional residual connections.
+    """
+
     def __init__(
             self,
             node_input_dim: int,
@@ -93,6 +122,19 @@ class GCNLayer(ModuleMPNN):
             bias=True,
             **kwrags
     ):
+
+        """Initialize the GCN layer.
+
+        Args:
+            node_input_dim: Dimensionality of input node features.
+            node_hidden_dim: Dimensionality of output node features.
+            improved: Whether to use the improved GCN normalization.
+            cached: Whether to cache the normalized adjacency matrix.
+            add_self_loops: Whether to add self-loops to the graph.
+            normalize_in: Whether to apply graph normalization.
+            bias: Whether to include a learnable bias term.
+            **kwrags: Additional arguments passed to ModuleMPNN.
+        """
 
         super().__init__(node_hidden_dim=node_hidden_dim, **kwrags)
 
@@ -109,6 +151,12 @@ class GCNLayer(ModuleMPNN):
 
 
 class GINlayer(ModuleMPNN):
+
+    """**[Graph Isomorphism Network (GIN)](https://arxiv.org/abs/1810.00826)** convolution layer.
+
+        Supports both standard GIN and edge-aware GINE convolution.
+    """
+
     def __init__(
             self, 
             node_input_dim: int,
@@ -118,6 +166,17 @@ class GINlayer(ModuleMPNN):
             train_eps=True,
             **kwargs
     ):
+        
+        """Initialize the GIN layer.
+
+        Args:
+            node_input_dim: Dimensionality of input node features.
+            node_hidden_dim: Dimensionality of hidden node features.
+            act_function: Activation function used in the MLP.
+            eps: Initial value of the learnable or fixed epsilon parameter.
+            train_eps: Whether epsilon is a learnable parameter.
+            **kwargs: Additional arguments passed to ModuleMPNN.
+        """
         
         super().__init__(node_hidden_dim=node_hidden_dim, **kwargs)
 
@@ -144,6 +203,13 @@ class GINlayer(ModuleMPNN):
 
 
 class GATLayer(ModuleMPNN):
+
+    """**[Graph Attention Network (GAT)](https://arxiv.org/abs/1710.10903)** convolution layer.
+
+    Supports both GATv1 and GATv2 operators, with optional edge attributes
+    and multi-head attention.
+    """
+
     def __init__(
             self,
             node_input_dim: int,
@@ -157,7 +223,27 @@ class GATLayer(ModuleMPNN):
             **kwargs
     ):
 
+
         super().__init__(node_hidden_dim=node_hidden_dim, **kwargs)
+
+        """Initialize the GAT layer.
+
+        Args:
+            node_input_dim: Dimensionality of input node features.
+            node_hidden_dim: Number of output features per attention head.
+            gat_version: Attention operator version (1 for GAT, 2 for GATv2).
+            num_heads: Number of parallel attention heads.
+            concat: Whether to concatenate attention head outputs.
+            negative_slope: Negative slope used by the LeakyReLU attention
+                activation.
+            add_self_loops: Whether to add self-loops to the graph.
+            bias: Whether to include a learnable bias term.
+            **kwargs: Additional arguments passed to ModuleMPNN.
+
+        Raises:
+            ValueError: If an unsupported GAT version is specified.
+        """
+
 
         if self.edge_attr:
             assert self.edge_dim, 'Error, edge feature input dimension is needed'
@@ -190,6 +276,17 @@ class GATLayer(ModuleMPNN):
             raise ValueError('Only GAT versions 1 and 2 are available')
 
 class EGNNConv(Module):
+
+        """**[Equivariant Graph Neural Network (EGNN)](https://arxiv.org/abs/2102.09844)** convolution layer.
+
+            Updates node representations and spatial coordinates through
+            geometry-informed message passing. Interatomic distances are expanded
+            using radial basis functions and can be modulated by a cosine cutoff.
+
+            The coordinate update is constructed from relative position vectors
+            and learned scalar weights.
+        """
+        
         def __init__(
                 self, 
                 input_dim, 
@@ -201,6 +298,19 @@ class EGNNConv(Module):
                 cosine_cutoff=True, 
                 velocity=False, 
         ):
+
+            """Initialize the EGNN convolution layer.
+
+            Args:
+                input_dim: Dimensionality of input node features.
+                hidden_dim: Dimensionality of intermediate message representations.
+                output_dim: Dimensionality of output node features.
+                cutoff: Maximum distance considered for geometric interactions.
+                n_rbf: Number of radial basis functions used for distance encoding.
+                edge_attr: Whether to incorporate edge attributes into messages.
+                cosine_cutoff: Whether to apply a cosine cutoff envelope.
+                velocity: Configuration flag for coordinate update behavior.
+            """
               
             super().__init__()
 
@@ -324,6 +434,12 @@ class EGNNConv(Module):
 
 class EGNNConvBlock(Module):
 
+        """EGNN convolution block for updating node features and coordinates.
+
+        Wraps an EGNNConv layer to provide a consistent interface with
+        other message-passing network blocks.
+        """
+
         def __init__(
             self, 
             node_input_dim: int,
@@ -334,6 +450,18 @@ class EGNNConvBlock(Module):
             edge_attr=False, 
             velocity=False, 
         ):
+
+            """Initialize the EGNN convolution block.
+
+                Args:
+                    node_input_dim: Dimensionality of input node features.
+                    node_hidden_dim: Dimensionality of hidden and output node features.
+                    n_rbf: Number of radial basis functions.
+                    cutoff: Maximum distance considered for geometric interactions.
+                    cosine_cutoff: Whether to apply a cosine cutoff envelope.
+                    edge_attr: Whether to incorporate edge attributes into messages.
+                    velocity: Configuration flag passed to the EGNN layer.
+            """
     
             super().__init__()
 
@@ -366,6 +494,13 @@ class EGNNConvBlock(Module):
 
 
 class MPNNModule(Module):
+
+    """Configurable multi-layer message-passing neural network.
+
+    Supports GIN, GCN, GAT, and EGNN architectures. Constructs a stack
+    of the selected convolution type using the corresponding configuration.
+    """
+
     def __init__(
             self,
             mpnn_type: Literal['gin', 'gcn', 'gat', 'egnn'],
@@ -376,6 +511,23 @@ class MPNNModule(Module):
             cutoff: float,
             **kwargs
     ):
+
+        """Initialize a multi-layer message-passing network.
+
+        Args:
+            mpnn_type: Type of graph convolution. Supported options are
+                'gin', 'gcn', 'gat', and 'egnn'.
+            node_input_dim: Dimensionality of input node features.
+            node_hidden_dim: Dimensionality of hidden node representations.
+            n_layers: Number of message-passing layers.
+            n_rbf: Number of radial basis functions used by EGNN layers.
+            cutoff: Maximum interaction distance used by EGNN layers.
+            **kwargs: Additional configuration arguments passed to
+                individual convolution layers.
+
+        Raises:
+            ValueError: If an unsupported message-passing type is specified.
+        """
 
         super().__init__()
 

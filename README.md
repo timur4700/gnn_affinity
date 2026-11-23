@@ -3,6 +3,12 @@
 A Python framework for developing molecular graph neural network (GNN) models to predict protein–ligand binding affinity from structural data. It provides tools for molecular preprocessing, graph construction, and model development.
 
 
+# Project Status
+🚧 Active development
+
+The project is currently under active development.
+
+
 # Project Features
 
 **GNN Affinity** is a Python framework designed to simplify the development and application of graph neural networks (GNNs) for molecular property prediction, with a primary focus on protein–ligand binding affinity.

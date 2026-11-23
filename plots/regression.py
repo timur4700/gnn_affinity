@@ -1,3 +1,8 @@
+"""
+Inlcudes Plots Creation for Regression Models
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -6,6 +11,8 @@ from plots.colors import NATURE_COLORS
 from scipy.stats import pearsonr, spearmanr
 
 from typing import TypedDict
+
+from pathlib import PosixPath
 
 from sklearn.metrics import (
         r2_score,
@@ -46,12 +53,12 @@ def assess_prediction(
 
     
 def plot_predictions(
-        y_pred, 
-        y_true,
-        title,
-        save_path,
-        s=10,
-        bins=20
+        y_pred: np.ndarray, 
+        y_true: np.ndarray,
+        title: str,
+        save_path: str | PosixPath,
+        s: int=10,
+        bins: int=20
 ):
 
         evaluation = assess_prediction(y_true, y_pred)
@@ -123,3 +130,64 @@ def plot_predictions(
         ax_main.set_ylim((x.min(), max(x.max(), y_pred.max(), y_true.max())))
         ax_main.tick_params(labelsize=22)
         plt.savefig(save_path)
+
+
+
+def plot_residuals(
+        y_hat: np.ndarray,
+        y_true: np.ndarray,
+        title: str,
+        save_path: str | PosixPath,
+        s: int=30
+) -> None:
+
+    residual = y_true - y_hat
+
+    fig, ax = plt.subplots(figsize=(7, 5), dpi=500)
+
+    plt.title(title, fontsize=20)
+
+    ax.scatter(
+        y_hat, 
+        residual, 
+        s=s, 
+        alpha=0.8, 
+        c=NATURE_COLORS['red_2'], 
+        edgecolors='black', 
+        linewidths=0.3, 
+    )
+
+    ax.axhline(0, color=NATURE_COLORS['grey_1'], linestyle='--', linewidth=1)
+
+    x = np.linspace(0, max(data['y_hat']))
+
+    ax.fill_between(
+        x,
+        [1] * len(x),
+        [-1] * len(x),
+        color=NATURE_COLORS['grey_2'],
+        alpha=0.2,
+        edgecolor='none',
+        label='±1 SD'
+    )
+
+    ax.fill_between(
+        x,
+        [2] * len(x),
+        [-2] * len(x),
+        color=NATURE_COLORS['grey_3'],
+        alpha=0.2,
+        edgecolor='none',
+        label='±2 SD'
+    )
+
+    ax.set_xlabel("Predicted $pK$")
+    ax.set_ylabel('Residuals')
+    ax.set_title('Residuals vs. Predicted $pK$')
+
+    plt.xlim(
+        min(y_hat) - (0.15 * min(y_hat)), max(x) - (0.15 * max(x))
+    )
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
