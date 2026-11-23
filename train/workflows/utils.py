@@ -215,7 +215,7 @@ def make_performance_plot(
     title = f"Performance of GNN-based regression model [Run: {run_id}]"
 
     plot_predictions(
-        predictions['y_pred'],
+        predictions['y_hat'],
         predictions['y_true'],
         title,
         plot_save_path,
